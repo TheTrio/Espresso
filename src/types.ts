@@ -67,6 +67,17 @@ export class LetStatement implements Statement {
   }
 }
 
+export class ReturnStatement implements Statement {
+  node = {
+    type: TokenType.RETURN,
+  }
+  returnValue: Expression | null = null
+
+  constructor(returnValue?: Expression) {
+    this.returnValue = returnValue || null
+  }
+}
+
 export class BinaryExpression implements Expression {
   node: Token
   left: Expression

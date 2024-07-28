@@ -6,6 +6,7 @@ import {
   FunctionExpression,
   IfElseExpression,
   LetStatement,
+  ReturnStatement,
   Statement,
   Token,
   TokenType,
@@ -75,6 +76,8 @@ export class Parser {
     switch (this.currentToken()?.type) {
       case TokenType.LET:
         return this.parseLetStatement()
+      case TokenType.RETURN:
+        return this.parseReturnStatement()
       default:
         const statement = this.parseExpression()!
         if (this.currentToken()?.type === TokenType.SEMICOLON) {
@@ -94,6 +97,13 @@ export class Parser {
     letStatement.rvalue = this.parseExpression()
     this.match(TokenType.SEMICOLON)
     return letStatement
+  }
+
+  parseReturnStatement() {
+    this.match(TokenType.RETURN)
+    const returnStatement = new ReturnStatement(this.parseExpression()!)
+    this.match(TokenType.SEMICOLON)
+    return returnStatement
   }
 
   parseExpression(parentPrecedence: number = 0): Expression | null {
