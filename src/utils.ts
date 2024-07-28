@@ -24,3 +24,7 @@ export const getPrecedence = (token: Token) => {
   }
   return 0
 }
+
+export const isTruthy = (value: any) => {
+  return value === true
+}

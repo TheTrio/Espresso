@@ -22,6 +22,8 @@ export const PRECEDENCES = {
   [TokenType.LEFT_PAREN]: 3,
   [TokenType.LESS_THAN]: 1,
   [TokenType.GREATER_THAN]: 1,
+  [TokenType.EQ]: 1,
+  [TokenType.NOT_EQ]: 1,
 }
 
 export class Parser {
@@ -193,7 +195,6 @@ export class Parser {
       this.match(TokenType.RBRACE)
       return new IfElseExpression(token!, condition, consequence, alternative)
     }
-
     return new IfElseExpression(token!, condition, consequence, [])
   }
 

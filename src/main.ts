@@ -1,3 +1,4 @@
+import { Evaluator } from './evaluator'
 import { Parser } from './parser'
 // import process
 import repl from 'repl'
@@ -13,7 +14,8 @@ const r = repl.start({
       console.log(errors[0])
       return callback(null)
     }
-    console.dir(tree, { depth: null })
+    const evaluator = new Evaluator(parser.statements)
+    console.log(evaluator.evaluate())
     callback(null)
   },
 })

@@ -140,3 +140,11 @@ export class FunctionCallExpression implements Expression {
     this.node = node
   }
 }
+
+export class ReturnValue {
+  value: Expression
+
+  constructor(value: Expression) {
+    this.value = value
+  }
+}
