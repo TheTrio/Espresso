@@ -20,8 +20,8 @@ export const PRECEDENCES = {
   [TokenType.ASTERISK]: 2,
   [TokenType.SLASH]: 2,
   [TokenType.LEFT_PAREN]: 3,
-  [TokenType.LESS_THAN]: 4,
-  [TokenType.GREATER_THAN]: 4,
+  [TokenType.LESS_THAN]: 1,
+  [TokenType.GREATER_THAN]: 1,
 }
 
 export class Parser {
