@@ -1,3 +1,4 @@
+import { TypeMismatchError } from './errors'
 import {
   BinaryExpression,
   BlockExpression,
@@ -79,32 +80,40 @@ const evaluateBinaryExpression = (
       if (typeof left === 'number' && typeof right === 'number') {
         return left + right
       }
-      return null
+      throw new TypeMismatchError(TokenType.PLUS, typeof left, typeof right)
     case TokenType.MINUS:
       if (typeof left === 'number' && typeof right === 'number') {
         return left - right
       }
-      return null
+      throw new TypeMismatchError(TokenType.MINUS, typeof left, typeof right)
     case TokenType.ASTERISK:
       if (typeof left === 'number' && typeof right === 'number') {
         return left * right
       }
-      return null
+      throw new TypeMismatchError(TokenType.ASTERISK, typeof left, typeof right)
     case TokenType.SLASH:
       if (typeof left === 'number' && typeof right === 'number') {
         return left / right
       }
-      return null
+      throw new TypeMismatchError(TokenType.SLASH, typeof left, typeof right)
     case TokenType.LESS_THAN:
       if (typeof left === 'number' && typeof right === 'number') {
         return left < right
       }
-      return null
+      throw new TypeMismatchError(
+        TokenType.LESS_THAN,
+        typeof left,
+        typeof right
+      )
     case TokenType.GREATER_THAN:
       if (typeof left === 'number' && typeof right === 'number') {
         return left > right
       }
-      return null
+      throw new TypeMismatchError(
+        TokenType.GREATER_THAN,
+        typeof left,
+        typeof right
+      )
     case TokenType.EQ:
       return left === right
     case TokenType.NOT_EQ:

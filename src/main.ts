@@ -10,12 +10,19 @@ const r = repl.start({
     const tree = parser.parse()
     const errors = parser.errors
     if (errors.length > 0) {
-      console.log('Whoops! We ran into some errors:')
-      console.log(errors[0])
+      console.log('Parsing Error:', errors[0])
       return callback(null)
     }
-    const evaluator = new Evaluator(parser.statements)
-    console.log(evaluator.evaluate())
+    const evaluator = new Evaluator(tree)
+    try {
+      console.log(evaluator.evaluate())
+    } catch (e: any) {
+      console.log('Runtime error: ', e.message)
+    }
     callback(null)
   },
+})
+
+r.on('exit', () => {
+  console.log('Goodbye!')
 })
