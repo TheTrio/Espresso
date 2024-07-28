@@ -1,6 +1,7 @@
 import { Lexer } from './lexer'
 import {
   BinaryExpression,
+  BlockExpression,
   Expression,
   FunctionCallExpression,
   FunctionExpression,
@@ -44,6 +45,7 @@ export class Parser {
     [TokenType.LEFT_PAREN]: this.parseGroupedExpression.bind(this),
     [TokenType.IF]: this.parseIfExpression.bind(this),
     [TokenType.FUNCTION]: this.parseFunctions.bind(this),
+    [TokenType.LBRACE]: this.parseBlockExpression.bind(this),
   }
 
   constructor(code: string) {
@@ -134,7 +136,7 @@ export class Parser {
         const rightExpression = this.parseExpression(getPrecedence(operator))
         leftExpression = new BinaryExpression(
           operator,
-          leftExpression,
+          leftExpression!,
           rightExpression!
         )
       }
@@ -211,6 +213,28 @@ export class Parser {
       }
     }
     return statements
+  }
+
+  parseBlockExpression(): Expression | null {
+    this.match(TokenType.LBRACE)
+    const statements: Statement[] = []
+    while (
+      this.currentToken() &&
+      this.currentToken()?.type !== TokenType.RBRACE &&
+      this.currentToken()?.type !== TokenType.EOF
+    ) {
+      const statement = this.parseStatement()
+      if (statement) {
+        statements.push(statement)
+      }
+    }
+    this.match(TokenType.RBRACE)
+    if (statements.at(-1)?.node.type === TokenType.RETURN) {
+      return new BlockExpression(statements)
+    } else {
+      this.errors.push('Block expression must end with a return statement')
+      return null
+    }
   }
 
   parseFunctions(): Expression {

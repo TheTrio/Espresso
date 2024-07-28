@@ -54,6 +54,16 @@ export interface Statement {
 export interface Expression {
   node: Token
 }
+export class BlockExpression implements Expression {
+  node = {
+    type: TokenType.LBRACE,
+  }
+  statements: Statement[] = []
+
+  constructor(statements: Statement[]) {
+    this.statements = statements
+  }
+}
 export class LetStatement implements Statement {
   node = {
     type: TokenType.LET,

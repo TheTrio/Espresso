@@ -1,5 +1,6 @@
 import {
   BinaryExpression,
+  BlockExpression,
   Expression,
   IfElseExpression,
   LetStatement,
@@ -29,7 +30,11 @@ const evaluateStatements = (statements: Statement[]) => {
     if (statement instanceof LetStatement) {
       // evaluateLetStatement(statement)
     } else if (statement instanceof ReturnStatement) {
-      return evaluateExpression(statement.returnValue!)
+      let curr = evaluateExpression(statement.returnValue!)
+      while (curr instanceof ReturnValue) {
+        curr = evaluateExpression(curr.value)
+      }
+      return curr
     } else {
       result = evaluateExpression(statement)
       if (result instanceof ReturnValue) {
@@ -49,6 +54,9 @@ const evaluateExpression = (expression: Expression) => {
   }
   if (expression instanceof IfElseExpression) {
     return evaluateIfElseExpression(expression)
+  }
+  if (expression instanceof BlockExpression) {
+    return evaluateBlockStatements(expression.statements)
   }
   if (expression.node.type === TokenType.INT) {
     return parseInt(expression.node.value!)
