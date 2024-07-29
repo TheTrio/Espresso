@@ -12,7 +12,7 @@ const r = repl.start({
     const tree = parser.parse()
     const errors = parser.errors
     if (errors.length > 0) {
-      console.log('Parsing Error:', errors[0])
+      console.log('Parsing Error:', errors)
       return callback(null)
     }
     const evaluator = new Evaluator(tree, store)

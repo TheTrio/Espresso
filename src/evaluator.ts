@@ -25,7 +25,6 @@ export class Evaluator {
     this.store = store
   }
   evaluate() {
-    console.dir(this.statements, { depth: null })
     return evaluateStatements(this.statements, this.store)
   }
 }
@@ -117,7 +116,6 @@ const evaluateFunction = (
   expression: FunctionCallExpression
 ) => {
   if (!(func instanceof FunctionObject)) {
-    console.log({ func })
     throw new Error('Trying to call a non-function object')
   }
   const evaluatedArgs = expression.parameters.map((arg) =>
