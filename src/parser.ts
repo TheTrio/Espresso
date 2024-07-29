@@ -72,10 +72,16 @@ export class Parser {
   }
 
   parse() {
+    let lastPosition = this.position
     while (this.currentToken()?.type !== TokenType.EOF && this.currentToken()) {
       const statement = this.parseStatement()
       if (statement) {
         this.statements.push(statement)
+      }
+      if (this.position === lastPosition) {
+        break
+      } else {
+        lastPosition = this.position
       }
     }
     if (this.errors.length > 0) {
