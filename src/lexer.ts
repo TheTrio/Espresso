@@ -1,4 +1,4 @@
-import { IllegalTokenError } from './errors'
+import { IllegalTokenError, SyntaxError } from './errors'
 import { TokenType, Token, Keyword } from './types'
 import { isDigit, isLetter, isWhitespace } from './utils'
 
@@ -129,6 +129,9 @@ export class Lexer {
     while (this.currentChar !== '"' && this.currentChar !== '\0') {
       str += this.currentChar
       this.readChar()
+    }
+    if (this.currentChar !== '"') {
+      throw new SyntaxError(['Unterminated string'])
     }
     this.readChar()
     return str
