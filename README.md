@@ -15,6 +15,50 @@ This goes without saying, but this is not a language for serious use.
 
 It's based off of the Monkey language from the book [Writing an Interpreter in Go](https://interpreterbook.com/). I highly recommend it if you're interested in building your own language. I deviated from the book after the first couple of chapters, but the core ideas are the same.
 
+## Installation
+
+You can run the repl by cloning the repository and running
+
+```bash
+git clone https://github.com/TheTrio/Espresso
+cd Espresso
+pnpm install
+pnpm repl
+```
+
+In the REPL, you can type `.editor` to enter multiline mode. Then you can type your code and press `Ctrl + D` to run it.
+
+Or you can run single line code by typing it directly.
+
+```bash
+$ pnpm repl
+
+> @ repl /Users/shashwat/Code/Espresso
+> tsc && node dist/src/repl.js
+> .editor
+// Entering editor mode (Ctrl+D to finish, Ctrl+C to cancel)
+if(true){
+  "true"
+}else{
+  "false"
+}
+// press Ctrl + D
+true
+```
+
+```bash
+$ pnpm repl
+
+> @ repl /Users/shashwat/Code/Espresso
+> tsc && node dist/src/repl.js
+
+> let word = "hello";
+undefined
+> word + " world"
+hello world
+
+```
+
 ## Usage
 
 ### Variables

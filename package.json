@@ -8,6 +8,8 @@
     "typescript": "^5.5.4"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "watch:ts": "tsc --watch",
+    "repl": "tsc && node dist/src/repl.js"
   }
 }
