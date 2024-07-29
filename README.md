@@ -11,7 +11,9 @@ Some of its features are
 - Expressions everywhere
 - Blocks!
 
-This goes without saying, but this is a toy language. It's based off of the Monkey language from the book [Writing an Interpreter in Go](https://interpreterbook.com/). I've added some features and changed some things around, but the core of the language is the same and I highly recommend reading the book if you're interested in compilers and interpreters.
+This goes without saying, but this is not a language for serious use.
+
+It's based off of the Monkey language from the book [Writing an Interpreter in Go](https://interpreterbook.com/). I highly recommend it if you're interested in building your own language. I deviated from the book after the first couple of chapters, but the core ideas are the same.
 
 ## Usage
 
