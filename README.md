@@ -25,7 +25,7 @@ let b = 20;
 a + b; // 30
 ```
 
-There are currently 2 types of variables: `number` and `boolean`.
+There are currently 2 types of variables: `number`, `boolean` and `string`.
 
 You can mutate variables.
 
@@ -167,20 +167,20 @@ You can use the `if` keyword to create conditionals.
 ```js
 let a = 10;
 if (a > 5) {
-  a
+  "greater than 5"
 } else {
-  0
+  "less than or equal to 5"
 }
 ```
 
 `if` blocks are expressions too. They can have an optional `else` block
 
 ```js
-let a = 10;
-let b = if (a > 5) {
-  a; // or return a;
+let age = 22;
+let type = if (age > 18) {
+  "adult"
 } else {
-  0
+  "minor"
 };
-b // 10
+type // 10
 ```
