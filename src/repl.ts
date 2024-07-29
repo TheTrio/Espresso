@@ -3,8 +3,9 @@ import { Parser } from './parser'
 import repl from 'repl'
 import { Store } from './store'
 import { SyntaxError } from './errors'
+import { createBuiltins } from './builtins'
 
-const store = new Store()
+const store = new Store(createBuiltins())
 const r = repl.start({
   prompt: '> ',
   eval: (code: string, context: any, filename: any, callback: any) => {

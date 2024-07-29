@@ -9,6 +9,7 @@ import {
   FunctionObject,
   IfElseExpression,
   LetStatement,
+  NativeFunction,
   ReassignmentStatement,
   ReturnStatement,
   ReturnValue,
@@ -153,6 +154,9 @@ const evaluateFunction = (
   const evaluatedArgs = expression.parameters.map((arg) =>
     evaluateExpression(arg, store)
   )
+  if (func instanceof NativeFunction) {
+    return func.fn(...evaluatedArgs)
+  }
   const newStore = new Store(func.store)
   func.parameters.forEach((param, i) => {
     newStore.set(param.value!, evaluatedArgs[i])

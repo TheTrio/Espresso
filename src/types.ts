@@ -185,7 +185,10 @@ export class ReturnValue {
   }
 }
 
-export class FunctionObject {
+export interface Object {
+  asString: () => string
+}
+export class FunctionObject implements Object {
   parameters: Token[]
   body: Statement[]
   store: Store
@@ -198,5 +201,19 @@ export class FunctionObject {
 
   asString() {
     return `FUNCTION_OBJECT(${this.parameters.map((p) => p.value).join(', ')})`
+  }
+}
+
+export class NativeFunction extends FunctionObject {
+  fn: (...args: any[]) => any
+  name: string
+  constructor(name: string, fn: (...args: any[]) => any) {
+    super([], [], null!)
+    this.name = name
+    this.fn = fn
+  }
+
+  asString() {
+    return `NATIVE_FUNCTION(${this.name})`
   }
 }
