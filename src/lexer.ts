@@ -1,3 +1,4 @@
+import { IllegalTokenError } from './errors'
 import { TokenType, Token, Keyword } from './types'
 import { isDigit, isLetter, isWhitespace } from './utils'
 
@@ -107,11 +108,10 @@ export class Lexer {
             value: number,
           }
         } else {
-          token = TokenType.ILLEGAL
+          throw new IllegalTokenError(this.currentChar)
         }
       }
     }
-
     this.readChar()
     return {
       type: token,

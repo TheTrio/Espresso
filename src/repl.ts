@@ -1,15 +1,15 @@
 import { Evaluator } from './evaluator'
 import { Parser } from './parser'
-// import process
 import repl from 'repl'
 import { Store } from './store'
+import { SyntaxError } from './errors'
 
 const store = new Store()
 const r = repl.start({
   prompt: '> ',
   eval: (code: string, context: any, filename: any, callback: any) => {
-    const parser = new Parser(code)
     try {
+      const parser = new Parser(code)
       const tree = parser.parse()
       const evaluator = new Evaluator(tree, store)
       try {
@@ -22,7 +22,11 @@ const r = repl.start({
       }
       callback(null)
     } catch (e: any) {
-      console.log('Parsing Error:', e.errors)
+      if (e instanceof SyntaxError) {
+        console.log('Parsing Error:', e.errors)
+      } else {
+        console.log(e.message)
+      }
       return callback(null)
     }
   },

@@ -13,3 +13,9 @@ export class SyntaxError extends Error {
     this.errors = errors
   }
 }
+
+export class IllegalTokenError extends Error {
+  constructor(token: string) {
+    super(`Illegal token: ${token}`)
+  }
+}
