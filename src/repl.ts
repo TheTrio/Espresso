@@ -2,7 +2,9 @@ import { Evaluator } from './evaluator'
 import { Parser } from './parser'
 // import process
 import repl from 'repl'
+import { Store } from './store'
 
+const store = new Store()
 const r = repl.start({
   prompt: '> ',
   eval: (code: string, context: any, filename: any, callback: any) => {
@@ -13,9 +15,9 @@ const r = repl.start({
       console.log('Parsing Error:', errors[0])
       return callback(null)
     }
-    const evaluator = new Evaluator(tree)
+    const evaluator = new Evaluator(tree, store)
     try {
-      console.log(evaluator.evaluate())
+      console.dir(evaluator.evaluate(), { depth: null })
     } catch (e: any) {
       console.log('Runtime error: ', e.message)
     }

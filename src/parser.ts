@@ -126,11 +126,12 @@ export class Parser {
 
     const token = this.currentToken()
 
-    if (isBinaryOperator(token)) {
-      while (
-        this.currentToken()?.type !== TokenType.SEMICOLON &&
-        getPrecedence(this.currentToken()!) > parentPrecedence
-      ) {
+    while (
+      this.currentToken()?.type !== TokenType.SEMICOLON &&
+      this.currentToken()?.type !== TokenType.EOF &&
+      getPrecedence(this.currentToken()!) > parentPrecedence
+    ) {
+      if (isBinaryOperator(token)) {
         const operator = this.currentToken()!
         this.position++
         const rightExpression = this.parseExpression(getPrecedence(operator))
@@ -139,6 +140,14 @@ export class Parser {
           leftExpression!,
           rightExpression!
         )
+      } else if (this.currentToken()?.type === TokenType.LEFT_PAREN) {
+        this.position++
+        leftExpression = new FunctionCallExpression(
+          this.parseCallArguments(),
+          token!,
+          leftExpression as FunctionExpression
+        )
+        this.match(TokenType.RIGHT_PAREN)
       }
     }
     return leftExpression!
@@ -160,9 +169,6 @@ export class Parser {
   }
 
   parseIdentifier(): Expression {
-    if (this.peekToken?.type === TokenType.LEFT_PAREN) {
-      return this.parseCallExpression()
-    }
     return {
       node: this.match(TokenType.IDENT)!,
     }
@@ -229,12 +235,7 @@ export class Parser {
       }
     }
     this.match(TokenType.RBRACE)
-    if (statements.at(-1)?.node.type === TokenType.RETURN) {
-      return new BlockExpression(statements)
-    } else {
-      this.errors.push('Block expression must end with a return statement')
-      return null
-    }
+    return new BlockExpression(statements)
   }
 
   parseFunctions(): Expression {
@@ -249,14 +250,6 @@ export class Parser {
     return new FunctionExpression(parameters, body, funcToken!)
   }
 
-  parseCallExpression() {
-    const token = this.match(TokenType.IDENT)
-    this.match(TokenType.LEFT_PAREN)
-    const parameters = this.parseCallArguments()
-    this.match(TokenType.RIGHT_PAREN)
-    return new FunctionCallExpression(parameters, token!)
-  }
-
   parseCallArguments() {
     const args: Expression[] = []
     while (
@@ -264,6 +257,7 @@ export class Parser {
       this.currentToken()?.type !== TokenType.EOF &&
       this.currentToken()
     ) {
+      console.log('sad')
       const argument = this.parseExpression()
       if (argument) {
         args.push(argument)
@@ -302,7 +296,6 @@ export class Parser {
     this.errors.push(
       `expected ${tokenType} but got ${this.currentToken()?.type}`
     )
-    this.position++
   }
 
   get peekToken() {

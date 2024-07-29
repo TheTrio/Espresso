@@ -1,5 +1,5 @@
 import { PRECEDENCES } from './parser'
-import { Token } from './types'
+import { ReturnValue, Token } from './types'
 
 export const isLetter = (letter: string) => {
   return letter.match(/[a-zA-Z]/) || letter == '_'

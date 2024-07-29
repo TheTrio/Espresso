@@ -1,3 +1,5 @@
+import { Store } from './store'
+
 export type Token = {
   type: TokenType
   value?: string
@@ -144,10 +146,16 @@ export class FunctionExpression implements Expression {
 export class FunctionCallExpression implements Expression {
   parameters: Expression[] = []
   node: Token
+  function: Expression
 
-  constructor(parameters: Expression[], node: Token) {
+  constructor(
+    parameters: Expression[],
+    node: Token,
+    functionExpression: Expression
+  ) {
     this.parameters = parameters
     this.node = node
+    this.function = functionExpression
   }
 }
 
@@ -156,5 +164,17 @@ export class ReturnValue {
 
   constructor(value: Expression) {
     this.value = value
+  }
+}
+
+export class FunctionObject {
+  parameters: Token[]
+  body: Statement[]
+  store: Store
+
+  constructor(parameters: Token[], body: Statement[], store: Store) {
+    this.parameters = parameters
+    this.body = body
+    this.store = store
   }
 }

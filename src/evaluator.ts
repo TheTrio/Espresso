@@ -1,8 +1,12 @@
 import { TypeMismatchError } from './errors'
+import { Store } from './store'
 import {
   BinaryExpression,
   BlockExpression,
   Expression,
+  FunctionCallExpression,
+  FunctionExpression,
+  FunctionObject,
   IfElseExpression,
   LetStatement,
   ReturnStatement,
@@ -15,50 +19,65 @@ import { isTruthy } from './utils'
 
 export class Evaluator {
   statements: Statement[]
-
-  constructor(statements: Statement[]) {
+  store: Store
+  constructor(statements: Statement[], store: Store) {
     this.statements = statements
+    this.store = store
   }
   evaluate() {
-    console.dir({ statements: this.statements }, { depth: null })
-    return evaluateStatements(this.statements)
+    console.dir(this.statements, { depth: null })
+    return evaluateStatements(this.statements, this.store)
   }
 }
 
-const evaluateStatements = (statements: Statement[]) => {
+const evaluateStatements = (statements: Statement[], store: Store) => {
   let result = null
   for (const statement of statements) {
     if (statement instanceof LetStatement) {
-      // evaluateLetStatement(statement)
+      evaluateLetStatement(statement, store)
     } else if (statement instanceof ReturnStatement) {
-      let curr = evaluateExpression(statement.returnValue!)
-      while (curr instanceof ReturnValue) {
-        curr = evaluateExpression(curr.value)
-      }
-      return curr
+      return evaluateExpression(statement.returnValue!, store)
     } else {
-      result = evaluateExpression(statement)
+      result = evaluateExpression(statement, store)
       if (result instanceof ReturnValue) {
-        return evaluateExpression(result.value)
+        return evaluateExpression(result.value, store)
       }
     }
   }
   return result
 }
 
-const evaluateExpression = (expression: Expression) => {
+const evaluateLetStatement = (statement: LetStatement, store: Store) => {
+  const value = evaluateExpression(statement.rvalue!, store)
+  store.set(statement.lvalue!.value!, value)
+}
+
+const evaluateExpression = (expression: Expression, store: Store) => {
   if (expression instanceof BinaryExpression) {
-    return evaluateBinaryExpression(expression)
+    return evaluateBinaryExpression(expression, store)
   }
   if (expression instanceof UnaryExpression) {
-    return evaluateUnaryExpression(expression)
+    return evaluateUnaryExpression(expression, store)
   }
   if (expression instanceof IfElseExpression) {
-    return evaluateIfElseExpression(expression)
+    return evaluateIfElseExpression(expression, store)
   }
   if (expression instanceof BlockExpression) {
-    return evaluateBlockStatements(expression.statements)
+    const blockStore = new Store(store)
+    return extractReturnValue(
+      evaluateBlockStatements(expression.statements, blockStore),
+      blockStore
+    )
   }
+
+  if (expression instanceof FunctionExpression) {
+    return evaluateFunctionExpression(expression, store)
+  }
+
+  if (expression instanceof FunctionCallExpression) {
+    return evaluateFunctionCallExpression(expression, store)
+  }
+
   if (expression.node.type === TokenType.INT) {
     return parseInt(expression.node.value!)
   }
@@ -68,13 +87,76 @@ const evaluateExpression = (expression: Expression) => {
   if (expression.node.type === TokenType.FALSE) {
     return false
   }
+  if (expression.node.type === TokenType.IDENT) {
+    return store.get(expression.node.value!)
+  }
+}
+
+const evaluateFunctionCallExpression: any = (
+  expression: FunctionCallExpression,
+  store: Store
+) => {
+  if (
+    expression.function instanceof FunctionCallExpression ||
+    expression.function instanceof FunctionExpression
+  ) {
+    return evaluateFunction(
+      evaluateExpression(expression.function, store),
+      store,
+      expression
+    )
+  } else {
+    const funcObject = store.get(expression.function.node.value!)
+    return evaluateFunction(funcObject, store, expression)
+  }
+}
+
+const evaluateFunction = (
+  func: FunctionObject,
+  store: Store,
+  expression: FunctionCallExpression
+) => {
+  if (!(func instanceof FunctionObject)) {
+    console.log({ func })
+    throw new Error('Trying to call a non-function object')
+  }
+  const evaluatedArgs = expression.parameters.map((arg) =>
+    evaluateExpression(arg, store)
+  )
+  const newStore = new Store(func.store)
+  func.parameters.forEach((param, i) => {
+    newStore.set(param.value!, evaluatedArgs[i])
+  })
+  return extractReturnValue(
+    evaluateBlockStatements(func.body, newStore),
+    newStore
+  )
+}
+
+const evaluateFunctionExpression = (
+  expression: FunctionExpression,
+  store: Store
+) => {
+  return new FunctionObject(expression.parameters, expression.body, store)
+}
+
+const extractReturnValue = (
+  value: number | boolean | null | ReturnValue | FunctionObject,
+  newStore: Store
+) => {
+  let curr = value
+  while (curr instanceof ReturnValue) {
+    curr = evaluateExpression(curr.value, newStore)!
+  }
+  return curr
 }
 
 const evaluateBinaryExpression = (
-  expression: BinaryExpression
+  expression: BinaryExpression,
+  store: Store
 ): number | boolean | null => {
-  const left = evaluateExpression(expression.left)
-  const right = evaluateExpression(expression.right)
+  const left = evaluateExpression(expression.left, store)
+  const right = evaluateExpression(expression.right, store)
   switch (expression.node.type) {
     case TokenType.PLUS:
       if (typeof left === 'number' && typeof right === 'number') {
@@ -123,9 +205,10 @@ const evaluateBinaryExpression = (
 }
 
 const evaluateUnaryExpression = (
-  expression: UnaryExpression
+  expression: UnaryExpression,
+  store: Store
 ): number | boolean | null => {
-  const right = evaluateExpression(expression.expression!)
+  const right = evaluateExpression(expression.expression!, store)
   switch (expression.node.type) {
     case TokenType.MINUS:
       if (typeof right === 'number') {
@@ -142,29 +225,31 @@ const evaluateUnaryExpression = (
 }
 
 const evaluateIfElseExpression = (
-  expression: IfElseExpression
+  expression: IfElseExpression,
+  store: Store
 ): number | boolean | null | ReturnValue => {
-  const condition = evaluateExpression(expression.condition!)
+  const condition = evaluateExpression(expression.condition!, store)
   if (isTruthy(condition)) {
-    return evaluateBlockStatements(expression.consequence)!
+    return evaluateBlockStatements(expression.consequence, store)!
   } else {
-    return evaluateBlockStatements(expression.alternative)!
+    return evaluateBlockStatements(expression.alternative, store)!
   }
 }
 
 const evaluateBlockStatements = (
-  statements: Statement[]
+  statements: Statement[],
+  store: Store
 ): number | boolean | null | ReturnValue => {
   let result = null
   for (const statement of statements) {
     if (statement instanceof LetStatement) {
-      // evaluateLetStatement(statement)
+      evaluateLetStatement(statement, store)!
     } else if (statement instanceof ReturnStatement) {
       return new ReturnValue(statement.returnValue!)
     } else {
-      result = evaluateExpression(statement)
+      result = evaluateExpression(statement, store)
       if (result instanceof ReturnValue) {
-        return evaluateExpression(result.value)!
+        return evaluateExpression(result.value, store)!
       }
     }
   }
