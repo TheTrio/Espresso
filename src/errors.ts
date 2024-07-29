@@ -19,3 +19,9 @@ export class IllegalTokenError extends Error {
     super(`Illegal token: ${token}`)
   }
 }
+
+export class VariableNotFoundError extends Error {
+  constructor(name: string) {
+    super(`Variable not found: ${name}`)
+  }
+}

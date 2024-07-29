@@ -8,6 +8,7 @@ import {
   FunctionExpression,
   IfElseExpression,
   LetStatement,
+  ReassignmentStatement,
   ReturnStatement,
   Statement,
   Token,
@@ -87,6 +88,11 @@ export class Parser {
       case TokenType.RETURN:
         return this.parseReturnStatement()
       default:
+        if (this.currentToken()?.type === TokenType.IDENT) {
+          if (this.peekToken?.type === TokenType.ASSIGN) {
+            return this.parseReassignStatement()
+          }
+        }
         const statement = this.parseExpression()!
         if (this.currentToken()?.type === TokenType.SEMICOLON) {
           this.position++
@@ -105,6 +111,14 @@ export class Parser {
     letStatement.rvalue = this.parseExpression()
     this.match(TokenType.SEMICOLON)
     return letStatement
+  }
+
+  parseReassignStatement() {
+    const lvalue = this.match(TokenType.IDENT)!
+    this.match(TokenType.ASSIGN)
+    const rvalue = this.parseExpression()
+    this.match(TokenType.SEMICOLON)
+    return new ReassignmentStatement(lvalue, rvalue!)
   }
 
   parseReturnStatement() {

@@ -1,4 +1,4 @@
-import { TypeMismatchError } from './errors'
+import { TypeMismatchError, VariableNotFoundError } from './errors'
 import { Store } from './store'
 import {
   BinaryExpression,
@@ -9,6 +9,7 @@ import {
   FunctionObject,
   IfElseExpression,
   LetStatement,
+  ReassignmentStatement,
   ReturnStatement,
   ReturnValue,
   Statement,
@@ -39,6 +40,8 @@ const evaluateStatements = (statements: Statement[], store: Store) => {
   for (const statement of statements) {
     if (statement instanceof LetStatement) {
       evaluateLetStatement(statement, store)
+    } else if (statement instanceof ReassignmentStatement) {
+      evaluateReassignmentStatement(statement, store)
     } else if (statement instanceof ReturnStatement) {
       return evaluateExpression(statement.returnValue!, store)
     } else {
@@ -49,6 +52,22 @@ const evaluateStatements = (statements: Statement[], store: Store) => {
     }
   }
   return result
+}
+
+const evaluateReassignmentStatement = (
+  statement: LetStatement,
+  store: Store
+) => {
+  let currentStore = store
+  while (currentStore) {
+    if (currentStore.data.has(statement.lvalue!.value!)) {
+      const value = evaluateExpression(statement.rvalue!, currentStore)
+      currentStore.set(statement.lvalue!.value!, value)
+      return
+    }
+    currentStore = currentStore.parentStore!
+  }
+  throw new VariableNotFoundError(statement.lvalue!.value!)
 }
 
 const evaluateLetStatement = (statement: LetStatement, store: Store) => {
@@ -247,6 +266,8 @@ const evaluateBlockStatements = (
   for (const statement of statements) {
     if (statement instanceof LetStatement) {
       evaluateLetStatement(statement, store)!
+    } else if (statement instanceof ReassignmentStatement) {
+      evaluateReassignmentStatement(statement, store)
     } else if (statement instanceof ReturnStatement) {
       return new ReturnValue(statement.returnValue!)
     } else {

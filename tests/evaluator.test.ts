@@ -65,6 +65,38 @@ describe('Testing functions', () => {
         'let add = fn(x) { fn(y) { x + y } };let add2 = add(2); add2(3)'
       )
     ).toBe(5)
+    expect(
+      getOutput(
+        `
+      let makeCounter = fn() {
+        let count = 0;
+        return fn() {
+          count = count + 1;
+          return count;
+        };
+      };
+
+      let counter = makeCounter();
+      counter();
+      counter();`
+      )
+    ).toBe(2)
+    expect(
+      getOutput(
+        `
+      let makeCounter = fn(increment) {
+        let count = 0;
+        return fn() {
+          count = count + increment;
+          return count;
+        };
+      };
+
+      let counter = makeCounter(5);
+      counter();
+      counter();`
+      )
+    ).toBe(10)
   })
 
   test('recursion', () => {

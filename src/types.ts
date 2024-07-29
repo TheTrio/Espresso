@@ -79,6 +79,19 @@ export class LetStatement implements Statement {
   }
 }
 
+export class ReassignmentStatement implements Statement {
+  node = {
+    type: TokenType.LET,
+  }
+  lvalue: Token | null = null
+  rvalue: Expression | null = null
+
+  constructor(lvalue?: Token, rvalue?: Expression) {
+    this.lvalue = lvalue || null
+    this.rvalue = rvalue || null
+  }
+}
+
 export class ReturnStatement implements Statement {
   node = {
     type: TokenType.RETURN,
