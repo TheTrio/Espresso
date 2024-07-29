@@ -36,7 +36,7 @@ export class Evaluator {
 }
 
 const evaluateStatements = (statements: Statement[], store: Store) => {
-  let result = null
+  let result = undefined
   for (const statement of statements) {
     if (statement instanceof LetStatement) {
       evaluateLetStatement(statement, store)
@@ -88,7 +88,7 @@ const evaluateExpression = (expression: Expression, store: Store) => {
   if (expression instanceof BlockExpression) {
     const blockStore = new Store(store)
     return extractReturnValue(
-      evaluateBlockStatements(expression.statements, blockStore),
+      evaluateBlockStatements(expression.statements, blockStore)!,
       blockStore
     )
   }
@@ -109,6 +109,9 @@ const evaluateExpression = (expression: Expression, store: Store) => {
   }
   if (expression.node.type === TokenType.FALSE) {
     return false
+  }
+  if (expression.node.type === TokenType.NULL) {
+    return null
   }
   if (expression.node.type === TokenType.IDENT) {
     return store.get(expression.node.value!)
@@ -150,7 +153,7 @@ const evaluateFunction = (
     newStore.set(param.value!, evaluatedArgs[i])
   })
   return extractReturnValue(
-    evaluateBlockStatements(func.body, newStore),
+    evaluateBlockStatements(func.body, newStore)!,
     newStore
   )
 }
@@ -176,7 +179,7 @@ const extractReturnValue = (
 const evaluateBinaryExpression = (
   expression: BinaryExpression,
   store: Store
-): number | boolean | null => {
+): number | boolean | undefined => {
   const left = evaluateExpression(expression.left, store)
   const right = evaluateExpression(expression.right, store)
   switch (expression.node.type) {
@@ -241,27 +244,25 @@ const evaluateBinaryExpression = (
     case TokenType.NOT_EQ:
       return left !== right
   }
-  return null
 }
 
 const evaluateUnaryExpression = (
   expression: UnaryExpression,
   store: Store
-): number | boolean | null => {
+): number | boolean | undefined => {
   const right = evaluateExpression(expression.expression!, store)
   switch (expression.node.type) {
     case TokenType.MINUS:
       if (typeof right === 'number') {
         return -right
       }
-      return null
+      break
     case TokenType.BANG:
       if (typeof right === 'boolean') {
         return !right
       }
-      return null
+      break
   }
-  return null
 }
 
 const evaluateIfElseExpression = (
@@ -279,8 +280,8 @@ const evaluateIfElseExpression = (
 const evaluateBlockStatements = (
   statements: Statement[],
   store: Store
-): number | boolean | null | ReturnValue => {
-  let result = null
+): number | boolean | ReturnValue | undefined => {
+  let result = undefined
   for (const statement of statements) {
     if (statement instanceof LetStatement) {
       evaluateLetStatement(statement, store)!

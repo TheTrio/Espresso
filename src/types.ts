@@ -39,6 +39,7 @@ export enum TokenType {
   IF = 'IF',
   ELSE = 'ELSE',
   RETURN = 'RETURN',
+  NULL = 'NULL',
 }
 
 export enum Keyword {
@@ -49,6 +50,7 @@ export enum Keyword {
   if = 'IF',
   else = 'ELSE',
   return = 'RETURN',
+  null = 'NULL',
 }
 
 export interface Statement {

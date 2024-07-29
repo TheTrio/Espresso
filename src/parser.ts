@@ -46,6 +46,7 @@ export class Parser {
     [TokenType.BANG]: this.parsePrefixExpression.bind(this),
     [TokenType.TRUE]: this.parseBoolean.bind(this),
     [TokenType.FALSE]: this.parseBoolean.bind(this),
+    [TokenType.NULL]: this.parseNull.bind(this),
     [TokenType.LEFT_PAREN]: this.parseGroupedExpression.bind(this),
     [TokenType.IF]: this.parseIfExpression.bind(this),
     [TokenType.FUNCTION]: this.parseFunctions.bind(this),
@@ -100,6 +101,12 @@ export class Parser {
           this.position++
         }
         return statement
+    }
+  }
+
+  private parseNull() {
+    return {
+      node: this.match(TokenType.NULL)!,
     }
   }
 
