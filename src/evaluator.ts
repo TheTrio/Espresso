@@ -104,6 +104,11 @@ const evaluateExpression = (expression: Expression, store: Store) => {
   if (expression.node.type === TokenType.INT) {
     return parseInt(expression.node.value!)
   }
+
+  if (expression.node.type === TokenType.QUOTE) {
+    return expression.node.value
+  }
+
   if (expression.node.type === TokenType.TRUE) {
     return true
   }
@@ -240,9 +245,15 @@ const evaluateBinaryExpression = (
         typeof right
       )
     case TokenType.EQ:
-      return left === right
+      if (typeof left === typeof right) {
+        return left === right
+      }
+      throw new TypeMismatchError(TokenType.EQ, typeof left, typeof right)
     case TokenType.NOT_EQ:
-      return left !== right
+      if (typeof left === typeof right) {
+        return left !== right
+      }
+      throw new TypeMismatchError(TokenType.NOT_EQ, typeof left, typeof right)
   }
 }
 

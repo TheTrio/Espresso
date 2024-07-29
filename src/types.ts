@@ -31,6 +31,7 @@ export enum TokenType {
   RIGHT_PAREN = ')',
   LBRACE = '{',
   RBRACE = '}',
+  QUOTE = '"',
 
   FUNCTION = 'FUNCTION',
   LET = 'LET',

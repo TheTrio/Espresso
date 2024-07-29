@@ -51,6 +51,7 @@ export class Parser {
     [TokenType.IF]: this.parseIfExpression.bind(this),
     [TokenType.FUNCTION]: this.parseFunctions.bind(this),
     [TokenType.LBRACE]: this.parseBlockExpression.bind(this),
+    [TokenType.QUOTE]: this.parseStringLiteral.bind(this),
   }
 
   constructor(code: string) {
@@ -88,6 +89,12 @@ export class Parser {
       throw new SyntaxError(this.errors)
     }
     return this.statements
+  }
+
+  private parseStringLiteral() {
+    return {
+      node: this.match(TokenType.QUOTE)!,
+    }
   }
 
   private parseStatement() {

@@ -81,6 +81,13 @@ export class Lexer {
       case ',':
         token = TokenType.COMMA
         break
+      case '"':
+        this.readChar()
+        const value = this.getString()
+        return {
+          type: TokenType.QUOTE,
+          value,
+        }
       default: {
         if (isWhitespace(this.currentChar)) {
           this.readChar()
@@ -116,6 +123,15 @@ export class Lexer {
     return {
       type: token,
     }
+  }
+  getString() {
+    let str = ''
+    while (this.currentChar !== '"' && this.currentChar !== '\0') {
+      str += this.currentChar
+      this.readChar()
+    }
+    this.readChar()
+    return str
   }
 
   getIdentifier() {
