@@ -216,6 +216,8 @@ export class Parser {
       const statement = this.parseStatement()
       if (statement) {
         statements.push(statement)
+      } else {
+        this.position++
       }
     }
     return statements
@@ -257,10 +259,11 @@ export class Parser {
       this.currentToken()?.type !== TokenType.EOF &&
       this.currentToken()
     ) {
-      console.log('sad')
       const argument = this.parseExpression()
       if (argument) {
         args.push(argument)
+      } else {
+        this.position++
       }
       if (this.currentToken()?.type === TokenType.COMMA) {
         this.position++
@@ -279,6 +282,8 @@ export class Parser {
       const parameter = this.match(TokenType.IDENT)
       if (parameter) {
         parameters.push(parameter)
+      } else {
+        this.position++
       }
       if (this.currentToken()?.type === TokenType.COMMA) {
         this.position++
