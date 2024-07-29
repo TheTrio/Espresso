@@ -116,11 +116,8 @@ Of course, you can also return from functions.
 
 ```js
 let fib = fn(n){
-  if (n == 1) {
-    return 1;
-  }
-  if (n == 2) {
-    return 1;
+  if (n < 2) {
+    return n;
   }
   return fib(n - 1) + fib(n - 2);
 }
