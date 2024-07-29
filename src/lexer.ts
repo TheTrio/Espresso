@@ -10,7 +10,7 @@ export class Lexer {
     this.position = 0
   }
 
-  get currentChar() {
+  currentChar() {
     if (this.position >= this.input.length) {
       return '\0'
     }
@@ -35,7 +35,7 @@ export class Lexer {
     }
 
     // then check for single character tokens
-    switch (this.currentChar) {
+    switch (this.currentChar()) {
       case '\0':
         token = TokenType.EOF
         break
@@ -89,12 +89,12 @@ export class Lexer {
           value,
         }
       default: {
-        if (isWhitespace(this.currentChar)) {
+        if (isWhitespace(this.currentChar())) {
           this.readChar()
           return this.nextToken()
         }
 
-        if (isLetter(this.currentChar)) {
+        if (isLetter(this.currentChar())) {
           const identifier = this.getIdentifier()
           const keyword = Keyword[identifier as keyof typeof Keyword]
 
@@ -108,14 +108,14 @@ export class Lexer {
             type: TokenType.IDENT,
             value: identifier,
           }
-        } else if (isDigit(this.currentChar)) {
+        } else if (isDigit(this.currentChar())) {
           const number = this.getNumber()
           return {
             type: TokenType.INT,
             value: number,
           }
         } else {
-          throw new IllegalTokenError(this.currentChar)
+          throw new IllegalTokenError(this.currentChar())
         }
       }
     }
@@ -126,11 +126,11 @@ export class Lexer {
   }
   getString() {
     let str = ''
-    while (this.currentChar !== '"' && this.currentChar !== '\0') {
-      str += this.currentChar
+    while (this.currentChar() !== '"' && this.currentChar() !== '\0') {
+      str += this.currentChar()
       this.readChar()
     }
-    if (this.currentChar !== '"') {
+    if (this.currentChar() !== '"') {
       throw new SyntaxError(['Unterminated string'])
     }
     this.readChar()
@@ -140,10 +140,10 @@ export class Lexer {
   getIdentifier() {
     let identifier = ''
     while (
-      isLetter(this.currentChar) ||
-      (isDigit(this.currentChar) && identifier.length > 0)
+      isLetter(this.currentChar()) ||
+      (isDigit(this.currentChar()) && identifier.length > 0)
     ) {
-      identifier += this.currentChar
+      identifier += this.currentChar()
       this.readChar()
     }
     return identifier
@@ -151,8 +151,8 @@ export class Lexer {
 
   getNumber() {
     let number = ''
-    while (isDigit(this.currentChar)) {
-      number += this.currentChar
+    while (isDigit(this.currentChar())) {
+      number += this.currentChar()
       this.readChar()
     }
     return number
@@ -167,32 +167,39 @@ export class Lexer {
   }
 
   twoCharToken() {
-    if (this.currentChar === '=') {
+    if (this.currentChar() === '=') {
       if (this.peakChar() === '=') {
         this.position += 2
         return {
           type: TokenType.EQ,
         }
       }
-    } else if (this.currentChar === '!') {
+    } else if (this.currentChar() === '!') {
       if (this.peakChar() === '=') {
         this.position += 2
         return {
           type: TokenType.NOT_EQ,
         }
       }
-    } else if (this.currentChar === '<') {
+    } else if (this.currentChar() === '<') {
       if (this.peakChar() === '=') {
         this.position += 2
         return {
           type: TokenType.LESS_THAN_EQ,
         }
       }
-    } else if (this.currentChar === '>') {
+    } else if (this.currentChar() === '>') {
       if (this.peakChar() === '=') {
         this.position += 2
         return {
           type: TokenType.GREATER_THAN_EQ,
+        }
+      }
+    } else if (this.currentChar() === '/') {
+      if (this.peakChar() === '/') {
+        this.position += 2
+        while (this.currentChar() !== '\n' && this.currentChar() !== '\0') {
+          this.readChar()
         }
       }
     }

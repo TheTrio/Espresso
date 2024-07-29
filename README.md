@@ -165,11 +165,11 @@ b // undefined
 You can use the `if` keyword to create conditionals.
 
 ```js
-let a = 10;
-if (a > 5) {
-  "greater than 5"
+let name = "Shashwat";
+if (name == "Shashwat") {
+  "Hello Shashwat!"
 } else {
-  "less than or equal to 5"
+  "Hello stranger!"
 }
 ```
 
