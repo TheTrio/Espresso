@@ -169,40 +169,6 @@ let apply = fn(f, a, b) {
 apply(fn(a, b) { a + b; }, 10, 20); // 30
 ```
 
-### Returning values
-
-You can use the `return` keyword anywhere in the program. This will stop the execution of the current block and return the value.
-
-```js
-let a = 10;
-let b = 20;
-return a + b; // 30
-a / b; // This will not be executed
-```
-
-Of course, you can also return from functions.
-
-```js
-let fib = fn(n){
-  if (n < 2) {
-    return n;
-  }
-  return fib(n - 1) + fib(n - 2);
-}
-```
-
-Note that the `return` keyword is optional. If you don't use it, the last expression in the block will be returned. This is useful for short functions.
-
-```js
-let max = fn(a, b) {
-  if (a > b) {
-    a
-  } else {
-    b
-  }
-};
-```
-
 ### Blocks
 
 Blocks are a sequence of statements enclosed in curly braces `{}`. They are used to group statements together.
@@ -252,6 +218,97 @@ let type = if (age > 18) {
 };
 type // 10
 ```
+
+### Loops
+
+Espresso supports the traditional `while` loop.
+
+```js
+let i = 0;
+while (i < 10) {
+  print(i);
+  i = i + 1;
+}
+```
+
+Unlike other languages however, `while` loops in Espresso are expressions.
+
+```js
+let i = 1;
+let ans = while (i <=10) {
+  i = i + 1;
+  if (i == 5) {
+    return "done"; // This will break the loop and return "done" to the variable ans
+  }
+  i 
+};
+ans // done
+```
+
+### Returning values
+
+You can use the `return` keyword anywhere in the program. This will stop the execution of the current block and return the value.
+
+```js
+let a = 10;
+let b = 20;
+return a + b; // 30
+a / b; // This will not be executed
+```
+
+Of course, you can also return from functions.
+
+```js
+let fib = fn(n){
+  if (n < 2) {
+    return n;
+  }
+  return fib(n - 1) + fib(n - 2);
+}
+```
+
+Note that you can make do without the  `return` keyword in some cases.
+
+If you don't use it, the last expression in the block will be returned. This is useful for short functions.
+
+```js
+let max = fn(a, b) {
+  if (a > b) {
+    a
+  } else {
+    b
+  }
+};
+```
+
+While all that sounds simple, there are a few things to keep in mind.
+
+One, returning from a block moves control over to the parent block. This means that the following code doesn't do what you might expect.
+
+```js
+let func = fn(){
+  let count = 1;
+  while(count < 10){
+    count = count + 1;
+    if(count == 5){
+      return count;
+    }
+  }
+  return "sad";
+};
+```
+
+What do you think the value of `func()` will be?
+
+Unlike other languages where this would evaluate to `5`, in Espresso this will evaluate to `"sad"`. This is because the `return` statement breaks out of the loop and returns to the parent block.
+
+You might be wondering why I chose to implement it this way. The reason is that since all blocks are expressions, it would be inconsistent to have the `return` statement behave differently.
+
+The `return` statement is meant to return from the current block, and that's what it does.
+
+Unlike other languages, the `return` statement is not specific to a function. It can be used anywhere in the program to return from the current block.
+
+This also means there's no need for a `break` statement. You can use `return` to break out of a loop.
 
 ### Comments
 

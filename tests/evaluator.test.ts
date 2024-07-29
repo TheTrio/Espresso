@@ -282,6 +282,145 @@ describe('block expressions', () => {
   })
 })
 
+describe('while expressions', () => {
+  test('simple tests', () => {
+    expect(getOutput('let x = 0; while (x < 10) { x = x + 1; } x')).toBe(10)
+  })
+  test('with block expressions', () => {
+    expect(
+      getOutput(
+        `
+        let x = 0;
+        while (x < 10) {
+          {
+            x = x + 1;
+          }
+        }
+        x
+      `
+      )
+    ).toBe(10)
+  })
+  test('with return', () => {
+    expect(
+      getOutput(
+        `
+        let x = 0;
+        while (x < 10) {
+          {
+            x = x + 1;
+          }
+        }
+        return x;
+      `
+      )
+    ).toBe(10)
+  })
+
+  test('false condition', () => {
+    expect(
+      getOutput(
+        `
+        while (false) {}
+      `
+      )
+    ).toBe(undefined)
+  })
+
+  test('nested while', () => {
+    expect(
+      getOutput(
+        `
+        let x = 0;
+        let ans = 0;
+        while (x < 10) {
+          let y = 0;
+          while (y < 10) {
+            y = y + 1;
+            ans = ans + 1;
+          }
+          x = x + 1;
+        }
+        ans
+      `
+      )
+    ).toBe(100)
+  })
+
+  test('while with return', () => {
+    expect(
+      getOutput(
+        `
+        let count = 1;
+        while(count<=10){
+          count = count + 1;
+          if(count==5){
+            return count;
+          }
+        }
+      `
+      )
+    ).toBe(5)
+  })
+
+  test('while with if else', () => {
+    expect(
+      getOutput(
+        `
+        let count = 1;
+        while(count<=10){
+          if(count==5){
+            return count;
+          }else{
+            count = count + 1;
+          }
+        }
+      `
+      )
+    ).toBe(5)
+  })
+
+  test('returning from nested while does not return from both loops', () => {
+    expect(
+      getOutput(
+        `
+        let count = 1;
+        while(count<=10){
+          let count2 = 1;
+          while(count2<=10){
+            count2 = count2 + 1;
+            if(count2==5){
+              return "dumb";
+            }
+          }
+          count = count + 1;
+        }
+      `
+      )
+    ).toBe(undefined)
+  })
+
+  test('returning from returned nested while does return from both loops', () => {
+    expect(
+      getOutput(
+        `
+        let count = 1;
+        while(count<=10){
+          let count2 = 1;
+          return while(count2<=10){
+            count2 = count2 + 1;
+            if(count2==5){
+              return "dumb";
+            }
+          };
+          count = count + 1;
+        }
+      `
+      )
+    ).toBe('dumb')
+  })
+})
+
 describe('implicit return', () => {
   test('simple tests', () => {
     expect(getOutput('fn(x) { x + 1 }(1)')).toBe(2)

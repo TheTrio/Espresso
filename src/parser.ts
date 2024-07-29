@@ -14,6 +14,7 @@ import {
   Token,
   TokenType,
   UnaryExpression,
+  WhileExpression,
 } from './types'
 import { getPrecedence, isBinaryOperator } from './utils'
 
@@ -52,6 +53,7 @@ export class Parser {
     [TokenType.FUNCTION]: this.parseFunctions.bind(this),
     [TokenType.LBRACE]: this.parseBlockExpression.bind(this),
     [TokenType.QUOTE]: this.parseStringLiteral.bind(this),
+    [TokenType.WHILE]: this.parseWhileExpression.bind(this),
   }
 
   constructor(code: string) {
@@ -89,6 +91,17 @@ export class Parser {
       throw new SyntaxError(this.errors)
     }
     return this.statements
+  }
+
+  private parseWhileExpression() {
+    const token = this.match(TokenType.WHILE)
+    this.match(TokenType.LEFT_PAREN)
+    const condition = this.parseExpression()
+    this.match(TokenType.RIGHT_PAREN)
+    this.match(TokenType.LBRACE)
+    const body = this.parseBlockStatement()
+    this.match(TokenType.RBRACE)
+    return new WhileExpression(token!, condition, body)
   }
 
   private parseStringLiteral() {

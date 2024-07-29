@@ -41,6 +41,7 @@ export enum TokenType {
   ELSE = 'ELSE',
   RETURN = 'RETURN',
   NULL = 'NULL',
+  WHILE = 'WHILE',
 }
 
 export enum Keyword {
@@ -52,6 +53,7 @@ export enum Keyword {
   else = 'ELSE',
   return = 'RETURN',
   null = 'NULL',
+  while = 'WHILE',
 }
 
 export interface Statement {
@@ -127,6 +129,18 @@ export class UnaryExpression implements Expression {
   constructor(node: Token, expression: Expression | null) {
     this.node = node
     this.expression = expression
+  }
+}
+
+export class WhileExpression implements Expression {
+  node: Token
+  condition: Expression | null
+  body: Statement[] = []
+
+  constructor(node: Token, condition: Expression | null, body: Statement[]) {
+    this.node = node
+    this.condition = condition
+    this.body = body
   }
 }
 

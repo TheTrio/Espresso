@@ -16,6 +16,7 @@ import {
   Statement,
   TokenType,
   UnaryExpression,
+  WhileExpression,
 } from './types'
 import { isTruthy } from './utils'
 
@@ -41,8 +42,10 @@ const evaluateStatements = (statements: Statement[], store: Store) => {
   for (const statement of statements) {
     if (statement instanceof LetStatement) {
       evaluateLetStatement(statement, store)
+      result = undefined
     } else if (statement instanceof ReassignmentStatement) {
       evaluateReassignmentStatement(statement, store)
+      result = undefined
     } else if (statement instanceof ReturnStatement) {
       return evaluateExpression(statement.returnValue!, store)
     } else {
@@ -92,6 +95,17 @@ const evaluateExpression = (expression: Expression, store: Store) => {
       evaluateBlockStatements(expression.statements, blockStore)!,
       blockStore
     )
+  }
+
+  if (expression instanceof WhileExpression) {
+    let result
+    while (isTruthy(evaluateExpression(expression.condition!, store))) {
+      result = evaluateBlockStatements(expression.body, store)
+      if (result instanceof ReturnValue) {
+        return extractReturnValue(result, store)
+      }
+    }
+    return result
   }
 
   if (expression instanceof FunctionExpression) {
@@ -308,14 +322,16 @@ const evaluateBlockStatements = (
   for (const statement of statements) {
     if (statement instanceof LetStatement) {
       evaluateLetStatement(statement, store)!
+      result = undefined
     } else if (statement instanceof ReassignmentStatement) {
       evaluateReassignmentStatement(statement, store)
+      result = undefined
     } else if (statement instanceof ReturnStatement) {
       return new ReturnValue(statement.returnValue!)
     } else {
       result = evaluateExpression(statement, store)
       if (result instanceof ReturnValue) {
-        return evaluateExpression(result.value, store)!
+        return result
       }
     }
   }
