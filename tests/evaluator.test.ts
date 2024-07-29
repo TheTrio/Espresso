@@ -338,6 +338,43 @@ describe('implicit return', () => {
   })
 })
 
+describe('Strings', () => {
+  test('simple tests', () => {
+    expect(getOutput('"hello"')).toBe('hello')
+    expect(getOutput('"hello" + "world"')).toBe('helloworld')
+  })
+  test('with variables', () => {
+    expect(getOutput('let x = "hello"; x')).toBe('hello')
+    expect(getOutput('let x = "hello"; let y = "world"; x + y')).toBe(
+      'helloworld'
+    )
+  })
+  test('with functions', () => {
+    expect(getOutput('let x = fn() { return "hello"; }; x() + "world"')).toBe(
+      'helloworld'
+    )
+  })
+  test('with if else', () => {
+    expect(
+      getOutput(
+        'let x = fn() { return "hello"; }; if (x()=="hello") { x() + "world" }'
+      )
+    ).toBe('helloworld')
+  })
+})
+
+describe('Nulls', () => {
+  test('simple tests', () => {
+    expect(getOutput('null')).toBe(null)
+    expect(getOutput('let x = null; x')).toBe(null)
+    expect(getOutput('let x = null; let y = null; x == y')).toBe(true)
+  })
+  test('with if else', () => {
+    expect(getOutput('if (null) { 1 } else { 2 }')).toBe(2)
+    expect(getOutput('if (null == null) { 1 } else { 2 }')).toBe(1)
+  })
+})
+
 describe('Miscellaneous tests', () => {
   test('simple tests', () => {
     expect(getOutput('let x = 1; let y = 2; x + y')).toBe(3)
@@ -411,11 +448,22 @@ describe('Error handling', () => {
   test('Data type errors', () => {
     expect(() => getOutput('1 + false')).toThrowError(TypeMismatchError)
     expect(() => getOutput('true / false')).toThrowError(TypeMismatchError)
+    expect(() => getOutput('"1" + 1')).toThrowError(TypeMismatchError)
+    expect(() => getOutput('"1" - "1"')).toThrowError(TypeMismatchError)
   })
   test('Syntax errors', () => {
     expect(() => getOutput('1 +')).toThrowError(SyntaxError)
     expect(() => getOutput('1 + 2 +')).toThrowError(SyntaxError)
     expect(() => getOutput('let x = 1')).toThrowError(SyntaxError)
     expect(() => getOutput('let x = {1')).toThrowError(SyntaxError)
+    expect(() => getOutput('let x = fn() { return 1')).toThrowError(SyntaxError)
+    expect(() => getOutput('"a')).toThrowError(SyntaxError)
+  })
+
+  test('Unmatched function calls', () => {
+    expect(() => getOutput('let func = fn(a){a};func(10,10)')).toThrowError(
+      Error
+    )
+    expect(() => getOutput('fn(a){a}(10,10)')).toThrowError(Error)
   })
 })

@@ -128,19 +128,24 @@ const evaluateFunctionCallExpression: any = (
   expression: FunctionCallExpression,
   store: Store
 ) => {
+  let funcObject
   if (
     expression.function instanceof FunctionCallExpression ||
     expression.function instanceof FunctionExpression
   ) {
-    return evaluateFunction(
-      evaluateExpression(expression.function, store),
-      store,
-      expression
-    )
+    funcObject = evaluateExpression(expression.function, store)
   } else {
-    const funcObject = store.get(expression.function.node.value!)
-    return evaluateFunction(funcObject, store, expression)
+    funcObject = store.get(expression.function.node.value!)
   }
+  if (
+    !(funcObject instanceof NativeFunction) &&
+    funcObject.parameters.length !== expression.parameters.length
+  ) {
+    throw new Error(
+      `Expected ${funcObject.parameters.length} arguments, got ${expression.parameters.length}`
+    )
+  }
+  return evaluateFunction(funcObject, store, expression)
 }
 
 const evaluateFunction = (
@@ -188,12 +193,15 @@ const extractReturnValue = (
 const evaluateBinaryExpression = (
   expression: BinaryExpression,
   store: Store
-): number | boolean | undefined => {
+): number | boolean | string | undefined => {
   const left = evaluateExpression(expression.left, store)
   const right = evaluateExpression(expression.right, store)
   switch (expression.node.type) {
     case TokenType.PLUS:
       if (typeof left === 'number' && typeof right === 'number') {
+        return left + right
+      }
+      if (typeof left === 'string' && typeof right === 'string') {
         return left + right
       }
       throw new TypeMismatchError(TokenType.PLUS, typeof left, typeof right)
