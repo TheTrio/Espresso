@@ -177,4 +177,8 @@ export class FunctionObject {
     this.body = body
     this.store = store
   }
+
+  asString() {
+    return `FUNCTION_OBJECT(${this.parameters.map((p) => p.value).join(', ')})`
+  }
 }

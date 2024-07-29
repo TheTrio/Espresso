@@ -124,14 +124,12 @@ export class Parser {
       return null
     }
 
-    const token = this.currentToken()
-
     while (
       this.currentToken()?.type !== TokenType.SEMICOLON &&
       this.currentToken()?.type !== TokenType.EOF &&
       getPrecedence(this.currentToken()!) > parentPrecedence
     ) {
-      if (isBinaryOperator(token)) {
+      if (isBinaryOperator(this.currentToken())) {
         const operator = this.currentToken()!
         this.position++
         const rightExpression = this.parseExpression(getPrecedence(operator))
@@ -141,11 +139,12 @@ export class Parser {
           rightExpression!
         )
       } else if (this.currentToken()?.type === TokenType.LEFT_PAREN) {
+        const token = this.currentToken()
         this.position++
         leftExpression = new FunctionCallExpression(
           this.parseCallArguments(),
           token!,
-          leftExpression as FunctionExpression
+          leftExpression!
         )
         this.match(TokenType.RIGHT_PAREN)
       }
@@ -167,7 +166,6 @@ export class Parser {
       this.parseExpression(PRECEDENCES[token?.type as keyof typeof PRECEDENCES])
     )
   }
-
   parseIdentifier(): Expression {
     return {
       node: this.match(TokenType.IDENT)!,

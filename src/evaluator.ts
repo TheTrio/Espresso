@@ -25,7 +25,12 @@ export class Evaluator {
     this.store = store
   }
   evaluate() {
-    return evaluateStatements(this.statements, this.store)
+    const result = evaluateStatements(this.statements, this.store)
+    if (result?.asString) {
+      return result.asString()
+    } else {
+      return result
+    }
   }
 }
 
