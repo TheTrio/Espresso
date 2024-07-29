@@ -25,6 +25,8 @@ export const PRECEDENCES = {
   [TokenType.LEFT_PAREN]: 3,
   [TokenType.LESS_THAN]: 1,
   [TokenType.GREATER_THAN]: 1,
+  [TokenType.LESS_THAN_EQ]: 1,
+  [TokenType.GREATER_THAN_EQ]: 1,
   [TokenType.EQ]: 1,
   [TokenType.NOT_EQ]: 1,
 }
@@ -165,6 +167,10 @@ export class Parser {
           leftExpression!
         )
         this.match(TokenType.RIGHT_PAREN)
+      } else {
+        throw new SyntaxError([
+          `Unknown token ${this.currentToken()?.type} in expression`,
+        ])
       }
     }
     return leftExpression!

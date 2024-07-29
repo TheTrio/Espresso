@@ -162,6 +162,20 @@ export class Lexer {
           type: TokenType.NOT_EQ,
         }
       }
+    } else if (this.currentChar === '<') {
+      if (this.peakChar() === '=') {
+        this.position += 2
+        return {
+          type: TokenType.LESS_THAN_EQ,
+        }
+      }
+    } else if (this.currentChar === '>') {
+      if (this.peakChar() === '=') {
+        this.position += 2
+        return {
+          type: TokenType.GREATER_THAN_EQ,
+        }
+      }
     }
   }
 }

@@ -218,6 +218,24 @@ const evaluateBinaryExpression = (
         typeof left,
         typeof right
       )
+    case TokenType.LESS_THAN_EQ:
+      if (typeof left === 'number' && typeof right === 'number') {
+        return left <= right
+      }
+      throw new TypeMismatchError(
+        TokenType.LESS_THAN_EQ,
+        typeof left,
+        typeof right
+      )
+    case TokenType.GREATER_THAN_EQ:
+      if (typeof left === 'number' && typeof right === 'number') {
+        return left >= right
+      }
+      throw new TypeMismatchError(
+        TokenType.GREATER_THAN_EQ,
+        typeof left,
+        typeof right
+      )
     case TokenType.EQ:
       return left === right
     case TokenType.NOT_EQ:

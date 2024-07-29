@@ -19,6 +19,8 @@ export enum TokenType {
   ASTERISK = '*',
   LESS_THAN = '<',
   GREATER_THAN = '>',
+  LESS_THAN_EQ = '<=',
+  GREATER_THAN_EQ = '>=',
   EQ = '==',
   NOT_EQ = '!=',
 

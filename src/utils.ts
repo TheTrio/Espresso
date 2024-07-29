@@ -15,7 +15,9 @@ export const isDigit = (letter: string) => {
 
 export const isBinaryOperator = (token: Token | null) => {
   if (!token) return false
-  return ['+', '-', '*', '/', '<', '>', '==', '!='].includes(token.type)
+  return ['+', '-', '*', '/', '<', '>', '==', '!=', '<=', '>='].includes(
+    token.type
+  )
 }
 
 export const getPrecedence = (token: Token) => {

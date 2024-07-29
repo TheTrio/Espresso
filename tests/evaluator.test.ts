@@ -395,10 +395,15 @@ describe('Miscellaneous tests', () => {
   })
   test('longer tests', () => {
     const code = `
-      let x = 1;
-      let y = 2;
-
+      let fib = fn(x) {
+        if(x < 2) {
+          return x;
+        }
+        return fib(x-1) + fib(x-2);
+      };
+      fib(10)
     `
+    expect(getOutput(code)).toBe(55)
   })
 })
 
