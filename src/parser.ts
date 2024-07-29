@@ -1,3 +1,4 @@
+import { SyntaxError } from './errors'
 import { Lexer } from './lexer'
 import {
   BinaryExpression,
@@ -73,6 +74,9 @@ export class Parser {
         this.statements.push(statement)
       }
     }
+    if (this.errors.length > 0) {
+      throw new SyntaxError(this.errors)
+    }
     return this.statements
   }
 
@@ -112,11 +116,11 @@ export class Parser {
 
   parseExpression(parentPrecedence: number = 0): Expression | null {
     let leftExpression: Expression | null = null
+
     const prefixFunction =
       this.PREFIX_FUNCTIONS[
         this.currentToken()!.type as keyof typeof this.PREFIX_FUNCTIONS
       ]
-
     if (prefixFunction) {
       leftExpression = prefixFunction()
     } else {

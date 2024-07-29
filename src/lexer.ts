@@ -120,7 +120,10 @@ export class Lexer {
 
   getIdentifier() {
     let identifier = ''
-    while (isLetter(this.currentChar)) {
+    while (
+      isLetter(this.currentChar) ||
+      (isDigit(this.currentChar) && identifier.length > 0)
+    ) {
       identifier += this.currentChar
       this.readChar()
     }

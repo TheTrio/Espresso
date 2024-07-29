@@ -9,22 +9,22 @@ const r = repl.start({
   prompt: '> ',
   eval: (code: string, context: any, filename: any, callback: any) => {
     const parser = new Parser(code)
-    const tree = parser.parse()
-    const errors = parser.errors
-    if (errors.length > 0) {
-      console.log('Parsing Error:', errors)
+    try {
+      const tree = parser.parse()
+      const evaluator = new Evaluator(tree, store)
+      try {
+        const result = evaluator.evaluate()
+        if (result !== null) {
+          console.log(result)
+        }
+      } catch (e: any) {
+        console.log('Runtime error: ', e.message)
+      }
+      callback(null)
+    } catch (e: any) {
+      console.log('Parsing Error:', e.errors)
       return callback(null)
     }
-    const evaluator = new Evaluator(tree, store)
-    try {
-      const result = evaluator.evaluate()
-      if (result !== null) {
-        console.log(result)
-      }
-    } catch (e: any) {
-      console.log('Runtime error: ', e.message)
-    }
-    callback(null)
   },
 })
 

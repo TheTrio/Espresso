@@ -5,3 +5,11 @@ export class TypeMismatchError extends Error {
     )
   }
 }
+
+export class SyntaxError extends Error {
+  errors: any[]
+  constructor(errors: any[]) {
+    super(`Syntax Error while parsing`)
+    this.errors = errors
+  }
+}
