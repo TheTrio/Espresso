@@ -256,6 +256,30 @@ describe('block expressions', () => {
     expect(getOutput('{ { 1; 2; return 3; 4 } }')).toBe(3)
     expect(getOutput('{ { let x = 1; x } }')).toBe(1)
   })
+  test('Shadowing variables', () => {
+    expect(
+      getOutput(
+        `
+        let x = 1;
+        {
+          let x = 2;
+          x
+        }
+      `
+      )
+    ).toBe(2)
+    expect(
+      getOutput(
+        `
+        let x = 1;
+        {
+          let x = 2;
+        }
+        x
+      `
+      )
+    ).toBe(1)
+  })
 })
 
 describe('implicit return', () => {

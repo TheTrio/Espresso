@@ -25,13 +25,35 @@ let b = 20;
 a + b; // 30
 ```
 
-There are currently 2 types of variables: `number`, `boolean` and `string`.
+There are currently 4 types of values: `number`, `boolean`, `string` and `null`. This is excluding functions.
 
-You can mutate variables.
+You can also mutate already declared variables.
 
 ```js
 let a = 10;
 a = 20;
+```
+
+Using let on an already declared variable works, but do keep in mind if the variable was in the global scope, it will be shadowed.
+
+```js
+let a = 10;
+{
+  let a = 20;
+  print(a); // 20
+}
+print(a); // 10
+```
+
+This is in contrast to simply using the `=` operator, which will mutate the variable in the scope it was declared in.
+
+```js
+let a = 10;
+{
+  a = 20;
+  print(a); // 20
+}
+print(a); // 20
 ```
 
 ### Functions
@@ -183,4 +205,45 @@ let type = if (age > 18) {
   "minor"
 };
 type // 10
+```
+
+### Comments
+
+Comments start with `//` and go until the end of the line.
+
+```js
+// This is a comment
+let a = 10; // This is also a comment
+```
+
+### Built-in functions
+
+Espresso comes with a few built-in functions.
+
+- `len`: Returns the length of a string or an array.
+- `print`: Prints a value to the console.
+
+```js
+let count = len("hello"); // 5
+print("hello", count, "world"); // hello 5 world
+```
+
+These functions are also first class values, so you can pass them around like any other function.
+
+```js
+let myPrint = print;
+myPrint("hello"); // hello
+```
+
+It's also important to note that these aren't reserved keywords. You can override them if you want.
+
+```js
+{
+  // this causes you to lose the len function in this block
+  let len = fn(a) {
+    return 10;
+  };
+  print(len("hello")); // 10
+}
+print(len("hello")); // 5
 ```
