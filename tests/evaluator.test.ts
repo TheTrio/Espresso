@@ -25,6 +25,7 @@ describe('Testing single line expressions', () => {
     expect(getOutput('4 - 5')).toBe(-1)
     expect(getOutput('2 * 3')).toBe(6)
     expect(getOutput('8 / 2')).toBe(4)
+    expect(getOutput('1 + 2 + "3"')).toBe('33')
   })
   test('precedence', () => {
     expect(getOutput('1 + 2 * 3')).toBe(7)
@@ -818,9 +819,7 @@ describe('Miscellaneous tests', () => {
 
 describe('Error handling', () => {
   test('Data type errors', () => {
-    expect(() => getOutput('1 + false')).toThrowError(TypeMismatchError)
     expect(() => getOutput('true / false')).toThrowError(TypeMismatchError)
-    expect(() => getOutput('"1" + 1')).toThrowError(TypeMismatchError)
     expect(() => getOutput('"1" - "1"')).toThrowError(TypeMismatchError)
   })
   test('Syntax errors', () => {

@@ -17,50 +17,6 @@ This goes without saying, but this is not a language for serious use.
 
 It's based off of the Monkey language from the book [Writing an Interpreter in Go](https://interpreterbook.com/). I highly recommend it if you're interested in building your own language. I deviated from the book after the first couple of chapters, but the core ideas are the same.
 
-## Installation
-
-You can run the repl by cloning the repository and running
-
-```bash
-git clone https://github.com/TheTrio/Espresso
-cd Espresso
-pnpm install
-pnpm repl
-```
-
-In the REPL, you can type `.editor` to enter multiline mode. Then you can type your code and press `Ctrl + D` to run it.
-
-Or you can run single line code by typing it directly.
-
-```bash
-$ pnpm repl
-
-> @ repl /Users/shashwat/Code/Espresso
-> tsc && node dist/src/repl.js
-> .editor
-// Entering editor mode (Ctrl+D to finish, Ctrl+C to cancel)
-if(true){
-  "true"
-}else{
-  "false"
-}
-// press Ctrl + D
-true
-```
-
-```bash
-$ pnpm repl
-
-> @ repl /Users/shashwat/Code/Espresso
-> tsc && node dist/src/repl.js
-
-> let word = "hello";
-undefined
-> word + " world"
-hello world
-
-```
-
 ## Usage
 
 1. [Variables](#variables)
@@ -72,8 +28,9 @@ hello world
 7. [Loops](#loops)
 8. [Scoping](#scoping)
 9. [Returning values](#returning-values)
-10. [Comments](#comments)
-11. [Built-in functions](#built-in-functions)
+10. [Object Oriented Programming](#object-oriented-programming)
+11. [Comments](#comments)
+12. [Built-in functions](#built-in-functions)
 
 ### Variables
 
@@ -85,7 +42,7 @@ let b = 20;
 a + b; // 30
 ```
 
-There are currently 4 types of values: `number`, `boolean`, `string`, `array`, `null`, and `function`.
+There are currently 8 types of values: `number`, `boolean`, `string`, `array`, `null`, `undefined`, `dictionaries` , and `function`.
 
 _**Note**_: Arrays and Functions are stored as references, while the rest are primitive values.
 
@@ -432,6 +389,36 @@ let func = fn(){
 
 Now the value of `func()` will be `5`, as expected.
 
+### Object Oriented Programming
+
+Espresso doesn't support object oriented programming. However, you can pretty much get all the way there by using dictionaries and functions.
+
+```js
+let Person = fn(name, age) {
+  let person = {
+    "name": name,
+    "age": age,
+    "greet": fn() {
+      print("Hello, my name is " + person["name"] + " and I am " + person["age"] + " years old.");
+    },
+    "birthday": fn() {
+      person["age"] = person["age"] + 1;
+    }
+  };
+  return person;
+};
+
+let john = Person("John", 30);
+let jane = Person("Jane", 25);
+
+john["greet"](); // Output: Hello, my name is John and I am 30 years old.
+jane["greet"](); // Output: Hello, my name is Jane and I am 25 years old.
+john["birthday"]();
+john["greet"](); // Output: Hello, my name is John and I am 31 years old.
+```
+
+Behold, the power of first class functions and dictionaries. Its [functions all the way down](https://en.wikipedia.org/wiki/Turtles_all_the_way_down).
+
 ### Comments
 
 Comments start with `//` and go until the end of the line.
@@ -445,10 +432,10 @@ let a = 10; // This is also a comment
 
 Espresso comes with a few built-in functions.
 
-- `len`: Returns the length of a string or an array.
+- `len`: Returns the length of any iterable.
 - `print`: Prints a value to the console.
 - `push`: Pushes a value to the end of an array.
-- `pop`: Pops a value from the end of an array by default. Takes an optional index to pop from a specific index.
+- `pop`: Pops a value from the end of an array by default. Takes an optional index to pop from that instead.
 
 ```js
 let count = len("hello"); // 5
@@ -473,4 +460,48 @@ It's also important to note that these aren't reserved keywords. You can overrid
   print(len("hello")); // 10
 }
 print(len("hello")); // 5
+```
+
+## Installation
+
+You can run the repl by cloning the repository and running
+
+```bash
+git clone https://github.com/TheTrio/Espresso
+cd Espresso
+pnpm install
+pnpm repl
+```
+
+In the REPL, you can type `.editor` to enter multiline mode. Then you can type your code and press `Ctrl + D` to run it.
+
+Or you can run single line code by typing it directly.
+
+```bash
+$ pnpm repl
+
+> @ repl /Users/shashwat/Code/Espresso
+> tsc && node dist/src/repl.js
+> .editor
+// Entering editor mode (Ctrl+D to finish, Ctrl+C to cancel)
+if(true){
+  "true"
+}else{
+  "false"
+}
+// press Ctrl + D
+true
+```
+
+```bash
+$ pnpm repl
+
+> @ repl /Users/shashwat/Code/Espresso
+> tsc && node dist/src/repl.js
+
+> let word = "hello";
+undefined
+> word + " world"
+hello world
+
 ```

@@ -329,6 +329,15 @@ const evaluateBinaryExpression = (
       if (typeof left === 'string' && typeof right === 'string') {
         return left + right
       }
+
+      if (typeof left === 'string' && typeof right === 'number') {
+        return left + right
+      }
+
+      if (typeof left === 'number' && typeof right === 'string') {
+        return left + right
+      }
+
       throw new TypeMismatchError(TokenType.PLUS, typeof left, typeof right)
     case TokenType.MINUS:
       if (typeof left === 'number' && typeof right === 'number') {
