@@ -227,7 +227,7 @@ let a = {
   let b = 10;
   b
 };
-b // undefined
+b // throws an error
 ```
 
 ### Conditionals
@@ -290,7 +290,7 @@ Espresso has block scoping. This means that variables declared inside a block ar
   let a = 20;
   print(a); // 20
 }
-print(a); // undefined
+print(a); // throws an error
 ```
 
 Same is true for functions, loops and conditionals.
@@ -300,7 +300,7 @@ let age = 22;
 if(age > 18){
   let adult = true;
 }
-print(adult); // undefined
+print(adult); // throws an error
 ```
 
 ### Returning values
