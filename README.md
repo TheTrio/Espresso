@@ -20,16 +20,17 @@ The language is based off of the Monkey language from the book [Writing an Inter
 1. [Variables](#variables)
 2. [Arrays](#arrays)
 3. [Dictionaries](#dictionaries)
-4. [Functions](#functions)
-5. [Blocks](#blocks)
-6. [Conditionals](#conditionals)
-7. [Loops](#loops)
-8. [Scoping](#scoping)
-9. [Returning values](#returning-values)
-10. [Object Oriented Programming](#object-oriented-programming)
-11. [Comments](#comments)
-12. [Built-in functions](#built-in-functions)
-13. [Examples](#examples)
+4. [Strings](#strings)
+5. [Functions](#functions)
+6. [Blocks](#blocks)
+7. [Conditionals](#conditionals)
+8. [Loops](#loops)
+9. [Scoping](#scoping)
+10. [Returning values](#returning-values)
+11. [Object Oriented Programming](#object-oriented-programming)
+12. [Comments](#comments)
+13. [Built-in functions](#built-in-functions)
+14. [Examples](#examples)
 
 ### Variables
 
@@ -112,6 +113,30 @@ let a = [1, 2, 3];
 let b = a;
 b[0] = 10;
 a; // [10, 2, 3]
+```
+
+### Strings
+
+Strings are declared with double quotes `""`.
+
+```js
+let a = "hello";
+let b = "world";
+a + " " + b; // hello world
+```
+
+You can access characters in a string using square brackets.
+
+```js
+let a = "hello";
+print("I like to " + a[1] + "at");// I like to eat
+```
+
+However, strings are immutable. This means that you can't change a character in a string.
+
+```js
+let a = "hello";
+a[0] = "H"; // This will throw an error
 ```
 
 ### Dictionaries
@@ -443,6 +468,8 @@ Espresso comes with a few built-in functions.
 - `print`: Prints a value to the console.
 - `push`: Pushes a value to the end of an array.
 - `pop`: Pops a value from the end of an array by default. Takes an optional index to pop from that instead.
+- `dict`: Creates an empty dictionary.
+- `str`: Converts a value to a string.
 
 ```js
 let count = len("hello"); // 5

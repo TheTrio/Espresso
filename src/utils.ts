@@ -49,7 +49,7 @@ export const asString = (value: any) => {
 
 export const isObject = (value: Expression | Value) => {
   if (value === null) {
-    return null
+    return false
   }
 
   switch (typeof value) {
@@ -57,7 +57,7 @@ export const isObject = (value: Expression | Value) => {
     case 'number':
     case 'boolean':
     case 'undefined':
-      return value
+      return false
   }
 
   return (
