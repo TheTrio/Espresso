@@ -42,7 +42,7 @@ a + b; // 30
 
 There are currently 8 types of values: `number`, `boolean`, `string`, `array`, `null`, `undefined`, `dictionaries` , and `function`.
 
-_**Note**_: Arrays and Functions are stored as references, while the rest are primitive values.
+_**Note**_: Arrays, Dictionaries and Functions  are stored as references, while the rest are primitive values.
 
 ```js
 print(10==10) // true
