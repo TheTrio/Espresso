@@ -61,6 +61,17 @@ hello world
 
 ## Usage
 
+1. [Variables](#variables)
+2. [Arrays](#arrays)
+3. [Functions](#functions)
+4. [Blocks](#blocks)
+5. [Conditionals](#conditionals)
+6. [Loops](#loops)
+7. [Scoping](#scoping)
+8. [Returning values](#returning-values)
+9. [Comments](#comments)
+10. [Built-in functions](#built-in-functions)
+
 ### Variables
 
 Variables are declared with the `let` keyword.
