@@ -415,7 +415,7 @@ john["birthday"]();
 john["greet"](); // Output: Hello, my name is John and I am 31 years old.
 ```
 
-Behold, the power of first class functions and dictionaries. Its [functions all the way down](https://en.wikipedia.org/wiki/Turtles_all_the_way_down).
+Behold, the power of first class functions, closures and dictionaries. Its [functions all the way down](https://en.wikipedia.org/wiki/Turtles_all_the_way_down).
 
 ### Comments
 
