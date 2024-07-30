@@ -16,6 +16,7 @@ import {
   Statement,
   TokenType,
   UnaryExpression,
+  Value,
   WhileExpression,
 } from './types'
 import { isTruthy } from './utils'
@@ -79,7 +80,21 @@ const evaluateLetStatement = (statement: LetStatement, store: Store) => {
   store.set(statement.lvalue!.value!, value)
 }
 
-const evaluateExpression = (expression: Expression, store: Store) => {
+const evaluateExpression = (
+  expression: Expression | Value,
+  store: Store
+): any => {
+  if (expression === null) {
+    return null
+  }
+  switch (typeof expression) {
+    case 'string':
+    case 'number':
+    case 'boolean':
+    case 'undefined':
+      return expression
+  }
+
   if (expression instanceof BinaryExpression) {
     return evaluateBinaryExpression(expression, store)
   }
@@ -87,22 +102,28 @@ const evaluateExpression = (expression: Expression, store: Store) => {
     return evaluateUnaryExpression(expression, store)
   }
   if (expression instanceof IfElseExpression) {
-    return evaluateIfElseExpression(expression, store)
+    const blockStore = new Store(store)
+    const result = evaluateIfElseExpression(expression, blockStore)
+    if (result instanceof ReturnValue) {
+      return new ReturnValue(evaluateExpression(result.value, blockStore))
+    }
+    return result
   }
   if (expression instanceof BlockExpression) {
     const blockStore = new Store(store)
     return extractReturnValue(
       evaluateBlockStatements(expression.statements, blockStore)!,
       blockStore
-    )
+    )!
   }
 
   if (expression instanceof WhileExpression) {
     let result
-    while (isTruthy(evaluateExpression(expression.condition!, store))) {
-      result = evaluateBlockStatements(expression.body, store)
+    const blockStore = new Store(store)
+    while (isTruthy(evaluateExpression(expression.condition!, blockStore))) {
+      result = evaluateBlockStatements(expression.body, blockStore)
       if (result instanceof ReturnValue) {
-        return extractReturnValue(result, store)
+        return new ReturnValue(evaluateExpression(result.value, blockStore))
       }
     }
     return result
@@ -194,7 +215,7 @@ const evaluateFunctionExpression = (
 }
 
 const extractReturnValue = (
-  value: number | boolean | null | ReturnValue | FunctionObject,
+  value: number | boolean | null | ReturnValue | FunctionObject | string,
   newStore: Store
 ) => {
   let curr = value

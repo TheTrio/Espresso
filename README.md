@@ -283,7 +283,37 @@ let max = fn(a, b) {
 
 While all that sounds simple, there are a few things to keep in mind.
 
-One, returning from a block moves control over to the parent block. This means that the following code doesn't do what you might expect.
+One, returning from a block moves control over to the nearest block up the chain that can catch the returning value. This means that the following code doesn't do what you might expect.
+
+```js
+let func = fn(){
+  let count = 1;
+  let lastVal = while(count <= 10){
+    count = count + 1;
+    if(count == 5){
+      return count; // This will break the loop and return 5 to the variable lastVal
+    }
+    count
+  };
+  return "sad";
+};
+```
+
+What do you think the value of `func()` will be?
+
+Unlike other languages where this would evaluate to `5`, in Espresso this will evaluate to `"sad"`. This is because the `return` statement breaks out of the loop and returns to the first block that catches its return value.
+
+Unlike other languages, the `return` statement is not specific to a function. It can be used anywhere in the program to return from the current block.
+
+You might be wondering why I chose to implement it this way. The reason is that since all blocks are expressions, it would be inconsistent to have the `return` statement behave differently.
+
+The `return` statement is meant to return a value from the current block, and that's what it does.
+
+This also means there's no need for a `break` statement. You can use `return` to break out of a loop.
+
+While this might look like a limitation at first, it's actually not that big of a deal. This is because `return` statements do bubble up, waiting to be caught by the first block that can handle them.
+
+For example, the above code can be made to behave as expected by removing the `let` statement which was catching the return value. This way, the return value will bubble up to the function block.
 
 ```js
 let func = fn(){
@@ -291,24 +321,14 @@ let func = fn(){
   while(count < 10){
     count = count + 1;
     if(count == 5){
-      return count;
+      return count; // This will break the loop and end the function, returning 5
     }
-  }
+  };
   return "sad";
 };
 ```
 
-What do you think the value of `func()` will be?
-
-Unlike other languages where this would evaluate to `5`, in Espresso this will evaluate to `"sad"`. This is because the `return` statement breaks out of the loop and returns to the parent block.
-
-You might be wondering why I chose to implement it this way. The reason is that since all blocks are expressions, it would be inconsistent to have the `return` statement behave differently.
-
-The `return` statement is meant to return from the current block, and that's what it does.
-
-Unlike other languages, the `return` statement is not specific to a function. It can be used anywhere in the program to return from the current block.
-
-This also means there's no need for a `break` statement. You can use `return` to break out of a loop.
+Now the value of `func()` will be `5`, as expected.
 
 ### Comments
 

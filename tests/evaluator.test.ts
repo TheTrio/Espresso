@@ -169,7 +169,7 @@ describe('Testing functions', () => {
   })
 })
 
-describe('Testing if else', () => {
+describe('If/else', () => {
   test('if else expressions', () => {
     expect(getOutput('if (1 < 2) { 1 } else { 2 }')).toBe(1)
     expect(getOutput('if (1 > 2) { 1 } else { 2 }')).toBe(2)
@@ -200,6 +200,33 @@ describe('Testing if else', () => {
     expect(
       getOutput('let x = 3; let z = if (x < 2) { x } else { 2 };z*2')
     ).toBe(4)
+  })
+  test('variables declared in if else are not accessible outside', () => {
+    expect(
+      getOutput(`
+      let _ = if(true){
+        let x = 10;
+        return {
+          return x + 10;
+        };
+      };
+      x
+    `)
+    ).toBeUndefined()
+  })
+
+  test('values returned are accessible outside', () => {
+    expect(
+      getOutput(`
+      let y = if(true){
+        let x = 10;
+        return {
+          return x + 10;
+        };
+      };
+      y
+    `)
+    ).toBe(20)
   })
 })
 
@@ -279,6 +306,50 @@ describe('block expressions', () => {
       `
       )
     ).toBe(1)
+  })
+  test('returning from block does not bubble', () => {
+    expect(
+      getOutput(
+        `
+        let x = 1;
+        {
+          return 2;
+        }
+        x
+      `
+      )
+    ).toBe(1)
+  })
+
+  test('variables declared in block are not accessible outside', () => {
+    expect(
+      getOutput(`
+      let _ = {
+        let x = 10;
+        return 100;
+      };
+      x
+    `)
+    ).toBeUndefined()
+  })
+
+  test('nested, returned values are accessible', () => {
+    expect(
+      getOutput(`
+      let x = {
+        let x1 = {
+          let y = 5;
+          let x2 = {
+            let x3 = 5;
+            return x3 + y;
+          };
+          return x2;
+        };
+        return x1;
+      };
+      x
+    `)
+    ).toBe(10)
   })
 })
 
@@ -397,27 +468,31 @@ describe('while expressions', () => {
         }
       `
       )
-    ).toBe(undefined)
+    ).toBe('dumb')
   })
 
-  test('returning from returned nested while does return from both loops', () => {
+  test('variables declared in while are not accessible outside', () => {
     expect(
-      getOutput(
-        `
-        let count = 1;
-        while(count<=10){
-          let count2 = 1;
-          return while(count2<=10){
-            count2 = count2 + 1;
-            if(count2==5){
-              return "dumb";
-            }
-          };
-          count = count + 1;
-        }
-      `
-      )
-    ).toBe('dumb')
+      getOutput(`
+      let _ = while(true){
+        let x = 10;
+        return 100;
+      };
+      x
+    `)
+    ).toBeUndefined()
+  })
+
+  test('but returned values can be computed', () => {
+    expect(
+      getOutput(`
+      let _ = while(true){
+        let x = 10;
+        return x;
+      };
+      _
+    `)
+    ).toBe(10)
   })
 })
 

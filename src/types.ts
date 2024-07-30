@@ -191,8 +191,9 @@ export class FunctionCallExpression implements Expression {
   }
 }
 
+export type Value = string | number | boolean | null | undefined
 export class ReturnValue {
-  value: Expression
+  value: Expression | Value
 
   constructor(value: Expression) {
     this.value = value
