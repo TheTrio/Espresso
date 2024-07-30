@@ -393,7 +393,7 @@ Now the value of `func()` will be `5`, as expected.
 
 Espresso doesn't support object oriented programming. However, you can pretty much get all the way there by using dictionaries and functions.
 
-```js
+```ts
 let Person = fn(name, age) {
   let person = {
     "name": name,
