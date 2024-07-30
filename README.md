@@ -2,6 +2,8 @@
 
 A high level interpreted language based on expressions. Built from scratch in Typescript.
 
+Named after the the [song](https://www.youtube.com/watch?v=eVli-tstM5E) by Sabrina Carpenter. And because — expressions. One of those is more important than the other. And its not the latter :-)
+
 Some of its features are
 
 - Dynamic typing
