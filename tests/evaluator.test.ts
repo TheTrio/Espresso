@@ -2,8 +2,13 @@ import { describe, expect, test } from '@jest/globals'
 import { Evaluator } from '../src/evaluator'
 import { Store } from '../src/store'
 import { Parser } from '../src/parser'
-import { SyntaxError, TypeMismatchError } from '../src/errors'
-
+import {
+  SyntaxError,
+  TypeMismatchError,
+  VariableNotFoundError,
+} from '../src/errors'
+import { jest } from '@jest/globals'
+import { ArrayObject, FunctionObject } from '../src/types'
 const getOutput = (input: string) => {
   const parser = new Parser(input)
   const tree = parser.parse()
@@ -108,8 +113,8 @@ describe('Testing functions', () => {
   })
   test('anonymous functions', () => {
     expect(getOutput('fn(a){fn(b){fn(c){a+b+c}}}(1)(2)(3)')).toBe(6)
-    expect(getOutput('fn(a){fn(b){fn(c){a+b+c}}}(1)(2)')).toBe(
-      'FUNCTION_OBJECT(c)'
+    expect(getOutput('fn(a){fn(b){fn(c){a+b+c}}}(1)(2)')).toBeInstanceOf(
+      FunctionObject
     )
   })
 
@@ -126,7 +131,7 @@ describe('Testing functions', () => {
         `
       )
     ).toBe(5)
-    expect(
+    expect(() =>
       getOutput(
         `
           let x = 1;
@@ -134,7 +139,7 @@ describe('Testing functions', () => {
           y
         `
       )
-    ).toBeUndefined()
+    ).toThrow(VariableNotFoundError)
     expect(
       getOutput(
         `
@@ -202,7 +207,7 @@ describe('If/else', () => {
     ).toBe(4)
   })
   test('variables declared in if else are not accessible outside', () => {
-    expect(
+    expect(() =>
       getOutput(`
       let _ = if(true){
         let x = 10;
@@ -212,7 +217,7 @@ describe('If/else', () => {
       };
       x
     `)
-    ).toBeUndefined()
+    ).toThrow(VariableNotFoundError)
   })
 
   test('values returned are accessible outside', () => {
@@ -322,7 +327,7 @@ describe('block expressions', () => {
   })
 
   test('variables declared in block are not accessible outside', () => {
-    expect(
+    expect(() =>
       getOutput(`
       let _ = {
         let x = 10;
@@ -330,7 +335,7 @@ describe('block expressions', () => {
       };
       x
     `)
-    ).toBeUndefined()
+    ).toThrow(VariableNotFoundError)
   })
 
   test('nested, returned values are accessible', () => {
@@ -472,7 +477,7 @@ describe('while expressions', () => {
   })
 
   test('variables declared in while are not accessible outside', () => {
-    expect(
+    expect(() =>
       getOutput(`
       let _ = while(true){
         let x = 10;
@@ -480,7 +485,7 @@ describe('while expressions', () => {
       };
       x
     `)
-    ).toBeUndefined()
+    ).toThrow(VariableNotFoundError)
   })
 
   test('but returned values can be computed', () => {
@@ -598,6 +603,75 @@ describe('Strings', () => {
         'let x = fn() { return "hello"; }; if (x()=="hello") { x() + "world" }'
       )
     ).toBe('helloworld')
+  })
+})
+
+describe('Arrays', () => {
+  test('simple tests', () => {
+    expect(getOutput('[]')).toBeInstanceOf(ArrayObject)
+    expect(getOutput('[1, 2, 3]')).toStrictEqual(new ArrayObject([1, 2, 3]))
+    expect(getOutput('[1, 2, 3][0]')).toBe(1)
+    expect(getOutput('[1, 2, 3][1]')).toBe(2)
+    expect(getOutput('[1, 2, 3][2]')).toBe(3)
+  })
+  test('with variables', () => {
+    expect(getOutput('let x = [1, 2, 3]; x[0]')).toBe(1)
+    expect(getOutput('let x = [1, 2, 3]; x[1]')).toBe(2)
+    expect(getOutput('let x = [1, 2, 3]; x[2]')).toBe(3)
+  })
+  test('with functions', () => {
+    expect(getOutput('let x = fn() { return [1, 2, 3]; }; x()[0]')).toBe(1)
+    expect(getOutput('let x = fn() { return [1, 2, 3]; }; x()[1]')).toBe(2)
+    expect(getOutput('let x = fn() { return [1, 2, 3]; }; x()[2]')).toBe(3)
+  })
+
+  test('with if else', () => {
+    expect(
+      getOutput(
+        'let x = fn() { return [1, 2, 3]; }; if (x()[0] == 1) { x()[0] }'
+      )
+    ).toBe(1)
+    expect(
+      getOutput(
+        'let x = fn() { return [1, 2, 3]; }; if (x()[1] == 2) { x()[1] }'
+      )
+    ).toBe(2)
+    expect(
+      getOutput(
+        'let x = fn() { return [1, 2, 3]; }; if (x()[2] == 3) { x()[2] }'
+      )
+    ).toBe(3)
+  })
+
+  test('works as references', () => {
+    expect(
+      getOutput(
+        `
+        let x = [1, 2, 3];
+        let y = x;
+        y[0] = 10;
+        x[0]
+      `
+      )
+    ).toBe(10)
+    expect(
+      getOutput(
+        `
+        let x = [1, 2, 3];
+        let y = x;
+        x = [10, 20, 30];
+        y
+      `
+      )
+    ).toStrictEqual(new ArrayObject([1, 2, 3]))
+  })
+
+  test('with different types', () => {
+    expect(getOutput('[1, "hello", true]')).toStrictEqual(
+      new ArrayObject([1, 'hello', true])
+    )
+    expect(getOutput('[1, "hello", true][0]')).toBe(1)
+    expect(getOutput('[fn(x){x*x}, "hello", true][0](10)')).toBe(100)
   })
 })
 

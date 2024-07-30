@@ -25,3 +25,9 @@ export class VariableNotFoundError extends Error {
     super(`Variable not found: ${name}`)
   }
 }
+
+export class ArrayIndexOutOfBoundsError extends Error {
+  constructor(index: number, length: number) {
+    super(`Array index out of bounds: ${index} (length: ${length})`)
+  }
+}

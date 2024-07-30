@@ -81,6 +81,12 @@ export class Lexer {
       case ',':
         token = TokenType.COMMA
         break
+      case '[':
+        token = TokenType.LBRACKET
+        break
+      case ']':
+        token = TokenType.RBRACKET
+        break
       case '"':
         this.readChar()
         const value = this.getString()

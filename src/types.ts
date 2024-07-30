@@ -32,7 +32,9 @@ export enum TokenType {
   LBRACE = '{',
   RBRACE = '}',
   QUOTE = '"',
-
+  LBRACKET = '[',
+  RBRACKET = ']',
+  INDEX = 'INDEX',
   FUNCTION = 'FUNCTION',
   LET = 'LET',
   TRUE = 'TRUE',
@@ -63,6 +65,7 @@ export interface Statement {
 export interface Expression {
   node: Token
 }
+
 export class BlockExpression implements Expression {
   node = {
     type: TokenType.LBRACE,
@@ -77,10 +80,10 @@ export class LetStatement implements Statement {
   node = {
     type: TokenType.LET,
   }
-  lvalue: Token | null = null
+  lvalue: LValue | null = null
   rvalue: Expression | null = null
 
-  constructor(lvalue?: Token, rvalue?: Expression) {
+  constructor(lvalue?: LValue, rvalue?: Expression) {
     this.lvalue = lvalue || null
     this.rvalue = rvalue || null
   }
@@ -90,14 +93,16 @@ export class ReassignmentStatement implements Statement {
   node = {
     type: TokenType.LET,
   }
-  lvalue: Token | null = null
+  lvalue: LValue | null = null
   rvalue: Expression | null = null
 
-  constructor(lvalue?: Token, rvalue?: Expression) {
+  constructor(lvalue?: LValue, rvalue?: Expression) {
     this.lvalue = lvalue || null
     this.rvalue = rvalue || null
   }
 }
+
+export type LValue = Token | IndexExpression
 
 export class ReturnStatement implements Statement {
   node = {
@@ -119,6 +124,19 @@ export class BinaryExpression implements Expression {
     this.node = node
     this.left = left
     this.right = right
+  }
+}
+
+export class IndexExpression implements Expression {
+  node: Token = {
+    type: TokenType.INDEX,
+  }
+  left: Expression
+  index: Expression
+
+  constructor(left: Expression, index: Expression) {
+    this.left = left
+    this.index = index
   }
 }
 
@@ -173,6 +191,46 @@ export class FunctionExpression implements Expression {
     this.body = body
     this.node = node
   }
+}
+
+export class ArrayLiteralExpression implements Expression {
+  elements: Expression[] = []
+  node: Token
+
+  constructor(elements: Expression[], node: Token) {
+    this.elements = elements
+    this.node = node
+  }
+}
+
+export abstract class IterableObject {
+  abstract _length(): number
+}
+
+export class ArrayObject extends IterableObject implements Object {
+  elements: (Object | Value)[] = []
+  length: number = 0
+
+  constructor(elements: (Object | Value)[]) {
+    super()
+    this.elements = elements
+    this.length = elements.length
+  }
+
+  asString() {
+    return `[${this.elements.map((e) => asString(e)).join(', ')}]`
+  }
+
+  _length() {
+    return this.length
+  }
+}
+
+const asString = (value: Object | Value) => {
+  if (value instanceof Object) {
+    return value.asString()
+  }
+  return value
 }
 
 export class FunctionCallExpression implements Expression {

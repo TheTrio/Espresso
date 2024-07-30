@@ -71,9 +71,9 @@ let b = 20;
 a + b; // 30
 ```
 
-There are currently 4 types of values: `number`, `boolean`, `string` and `null`. This is excluding functions.
+There are currently 4 types of values: `number`, `boolean`, `string`, `array`, and `null`. This is excluding functions. Arrays and functions are references, while other values are primitives.
 
-You can also mutate already declared variables.
+You can mutate already declared variables.
 
 ```js
 let a = 10;
@@ -100,6 +100,42 @@ let a = 10;
   print(a); // 20
 }
 print(a); // 20
+```
+
+### Arrays
+
+Arrays are declared with square brackets `[]`.
+
+```js
+let a = [1, 2, 3];
+push(a, 4);
+a; // [1, 2, 3, 4]
+```
+
+You can access and mutate elements in an array using square brackets.
+
+```js
+let a = [1, 2, 3];
+a[0]; // 1
+a[0] = 10;
+a; // [10, 2, 3]
+```
+
+There is no restriction on the type of elements in an array.
+
+```js
+let a = [1, "hello", true, [1, 2, 3], fn(x){ return x*x; }];
+print(a[4](10)); // 100
+print(a[1] + " world"); // hello world
+```
+
+Similar to other languages, arrays are references. This means that if you assign an array to another variable, both variables will point to the same array.
+
+```js
+let a = [1, 2, 3];
+let b = a;
+b[0] = 10;
+a; // [10, 2, 3]
 ```
 
 ### Functions
@@ -367,6 +403,8 @@ Espresso comes with a few built-in functions.
 
 - `len`: Returns the length of a string or an array.
 - `print`: Prints a value to the console.
+- `push`: Pushes a value to the end of an array.
+- `pop`: Pops a value from the end of an array by default. Takes an optional index to pop from a specific index.
 
 ```js
 let count = len("hello"); // 5

@@ -1,6 +1,8 @@
 import { TypeMismatchError, VariableNotFoundError } from './errors'
-import { Store } from './store'
+import { NOT_FOUND_IN_STORE, Store } from './store'
 import {
+  ArrayLiteralExpression,
+  ArrayObject,
   BinaryExpression,
   BlockExpression,
   Expression,
@@ -8,7 +10,9 @@ import {
   FunctionExpression,
   FunctionObject,
   IfElseExpression,
+  IndexExpression,
   LetStatement,
+  LValue,
   NativeFunction,
   ReassignmentStatement,
   ReturnStatement,
@@ -19,7 +23,7 @@ import {
   Value,
   WhileExpression,
 } from './types'
-import { isTruthy } from './utils'
+import { isTruthy, throwIfInvalidArrayIndexAccess } from './utils'
 
 export class Evaluator {
   statements: Statement[]
@@ -30,11 +34,7 @@ export class Evaluator {
   }
   evaluate() {
     const result = evaluateStatements(this.statements, this.store)
-    if (result?.asString) {
-      return result.asString()
-    } else {
-      return result
-    }
+    return result
   }
 }
 
@@ -65,19 +65,66 @@ const evaluateReassignmentStatement = (
 ) => {
   let currentStore = store
   while (currentStore) {
-    if (currentStore.data.has(statement.lvalue!.value!)) {
-      const value = evaluateExpression(statement.rvalue!, currentStore)
-      currentStore.set(statement.lvalue!.value!, value)
+    const lvalue = statement.lvalue!
+    let value
+    if (lvalue instanceof IndexExpression) {
+      value = getValueFromIndexExpression(lvalue, currentStore)
+    } else {
+      value = currentStore.getLocal(lvalue.value!)
+    }
+    if (value !== NOT_FOUND_IN_STORE) {
+      setValueFromLValue(
+        statement.lvalue!,
+        currentStore,
+        evaluateExpression(statement.rvalue!, store)
+      )
       return
     }
     currentStore = currentStore.parentStore!
   }
-  throw new VariableNotFoundError(statement.lvalue!.value!)
+}
+
+const getValueFromLValue = (lvalue: LValue, store: Store) => {
+  if (lvalue instanceof IndexExpression) {
+    return getValueFromIndexExpression(lvalue, store)
+  }
+
+  const result = store.get(lvalue.value!)
+  if (result === NOT_FOUND_IN_STORE) {
+    throw new VariableNotFoundError(lvalue.value!)
+  }
+  return result
+}
+
+const getValueFromIndexExpression = (lvalue: IndexExpression, store: Store) => {
+  const array = evaluateExpression(lvalue.left, store)
+  const index = evaluateExpression(lvalue.index, store)
+  if (!(array instanceof ArrayObject)) {
+    throw new Error('Trying to index a non-array object')
+  }
+  if (typeof index !== 'number') {
+    throw new Error('Index must be a number')
+  }
+  if (index < 0 || index >= array.elements.length) {
+    throw new Error('Index out of bounds')
+  }
+  return array.elements.at(index)
+}
+
+const setValueFromLValue = (lvalue: LValue, store: Store, value: any) => {
+  if (lvalue instanceof IndexExpression) {
+    const array = evaluateExpression(lvalue.left, store)
+    const index = evaluateExpression(lvalue.index, store)
+    throwIfInvalidArrayIndexAccess(array, index)
+    array.elements[index] = value
+  } else {
+    store.set(lvalue.value!, value)
+  }
 }
 
 const evaluateLetStatement = (statement: LetStatement, store: Store) => {
   const value = evaluateExpression(statement.rvalue!, store)
-  store.set(statement.lvalue!.value!, value)
+  setValueFromLValue(statement.lvalue!, store, value)
 }
 
 const evaluateExpression = (
@@ -93,6 +140,21 @@ const evaluateExpression = (
     case 'boolean':
     case 'undefined':
       return expression
+  }
+
+  if (expression instanceof ArrayLiteralExpression) {
+    return new ArrayObject(
+      expression.elements.map((e) => evaluateExpression(e, store))
+    )
+  }
+
+  if (expression instanceof IndexExpression) {
+    const array = evaluateExpression(expression.left, store)
+    const index = evaluateExpression(expression.index, store)
+    throwIfInvalidArrayIndexAccess(array, index)
+    if (array instanceof ArrayObject && typeof index === 'number') {
+      return array.elements.at(index)
+    }
   }
 
   if (expression instanceof BinaryExpression) {
@@ -155,7 +217,7 @@ const evaluateExpression = (
     return null
   }
   if (expression.node.type === TokenType.IDENT) {
-    return store.get(expression.node.value!)
+    return getValueFromLValue(expression.node, store)
   }
 }
 
@@ -163,10 +225,13 @@ const evaluateFunctionCallExpression: any = (
   expression: FunctionCallExpression,
   store: Store
 ) => {
-  let funcObject
+  let funcObject: FunctionObject
   if (
     expression.function instanceof FunctionCallExpression ||
-    expression.function instanceof FunctionExpression
+    expression.function instanceof FunctionExpression ||
+    expression.function instanceof IndexExpression ||
+    expression.function instanceof IfElseExpression ||
+    expression.function instanceof WhileExpression
   ) {
     funcObject = evaluateExpression(expression.function, store)
   } else {

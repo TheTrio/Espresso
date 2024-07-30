@@ -1,12 +1,14 @@
 import { SyntaxError } from './errors'
 import { Lexer } from './lexer'
 import {
+  ArrayLiteralExpression,
   BinaryExpression,
   BlockExpression,
   Expression,
   FunctionCallExpression,
   FunctionExpression,
   IfElseExpression,
+  IndexExpression,
   LetStatement,
   ReassignmentStatement,
   ReturnStatement,
@@ -16,7 +18,7 @@ import {
   UnaryExpression,
   WhileExpression,
 } from './types'
-import { getPrecedence, isBinaryOperator } from './utils'
+import { getPrecedence, isBinaryOperator, isLVal } from './utils'
 
 export const PRECEDENCES = {
   [TokenType.PLUS]: 1,
@@ -24,6 +26,8 @@ export const PRECEDENCES = {
   [TokenType.ASTERISK]: 2,
   [TokenType.SLASH]: 2,
   [TokenType.LEFT_PAREN]: 3,
+  [TokenType.LBRACKET]: 3,
+  [TokenType.ASSIGN]: 1,
   [TokenType.LESS_THAN]: 1,
   [TokenType.GREATER_THAN]: 1,
   [TokenType.LESS_THAN_EQ]: 1,
@@ -54,6 +58,7 @@ export class Parser {
     [TokenType.LBRACE]: this.parseBlockExpression.bind(this),
     [TokenType.QUOTE]: this.parseStringLiteral.bind(this),
     [TokenType.WHILE]: this.parseWhileExpression.bind(this),
+    [TokenType.LBRACKET]: this.parseArrayLiteral.bind(this),
   }
 
   constructor(code: string) {
@@ -93,6 +98,25 @@ export class Parser {
     return this.statements
   }
 
+  private parseArrayLiteral() {
+    const token = this.match(TokenType.LBRACKET)
+    const elements: Expression[] = []
+    while (
+      this.currentToken()?.type !== TokenType.RBRACKET &&
+      this.currentToken()?.type !== TokenType.EOF
+    ) {
+      const element = this.parseExpression()
+      if (element) {
+        elements.push(element)
+      }
+      if (this.currentToken()?.type === TokenType.COMMA) {
+        this.position++
+      }
+    }
+    this.match(TokenType.RBRACKET)
+    return new ArrayLiteralExpression(elements, token!)
+  }
+
   private parseWhileExpression() {
     const token = this.match(TokenType.WHILE)
     this.match(TokenType.LEFT_PAREN)
@@ -117,11 +141,6 @@ export class Parser {
       case TokenType.RETURN:
         return this.parseReturnStatement()
       default:
-        if (this.currentToken()?.type === TokenType.IDENT) {
-          if (this.peekToken?.type === TokenType.ASSIGN) {
-            return this.parseReassignStatement()
-          }
-        }
         const statement = this.parseExpression()!
         if (this.currentToken()?.type === TokenType.SEMICOLON) {
           this.position++
@@ -200,6 +219,25 @@ export class Parser {
           leftExpression!
         )
         this.match(TokenType.RIGHT_PAREN)
+      } else if (this.currentToken()?.type === TokenType.LBRACKET) {
+        this.position++
+        const index = this.parseExpression()
+        this.match(TokenType.RBRACKET)
+        leftExpression = new IndexExpression(leftExpression!, index!)
+      } else if (this.currentToken()?.type === TokenType.ASSIGN) {
+        this.position++
+        const rightExpression = this.parseExpression()
+        if (!isLVal(leftExpression?.node)) {
+          throw new SyntaxError([
+            `Expected lvalue, got ${leftExpression?.node.type}`,
+          ])
+        }
+        leftExpression = new ReassignmentStatement(
+          leftExpression instanceof IndexExpression
+            ? leftExpression
+            : leftExpression!.node,
+          rightExpression!
+        )
       } else {
         throw new SyntaxError([
           `Unknown token ${this.currentToken()?.type} in expression`,

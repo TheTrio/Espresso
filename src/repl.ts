@@ -15,7 +15,11 @@ const r = repl.start({
       const evaluator = new Evaluator(tree, store)
       try {
         const result = evaluator.evaluate()
-        console.log(result)
+        if (result?.asString) {
+          console.log(result.asString())
+        } else {
+          console.log(result)
+        }
       } catch (e: any) {
         console.log('Runtime error: ', e.message)
       }
