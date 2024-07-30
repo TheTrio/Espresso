@@ -1,6 +1,7 @@
 import { PRECEDENCES } from './parser'
+import { ArrayObject, DictionaryObject, FunctionObject } from './syntax/objects'
 import { Token, TokenType } from './syntax/token'
-import { Value } from './types'
+import { Expression, Value } from './types'
 
 export const isLetter = (letter: string) => {
   return letter.match(/[a-zA-Z]/) || letter == '_'
@@ -41,4 +42,24 @@ export const asString = (value: any) => {
     return value.asString()
   }
   return value
+}
+
+export const isObject = (value: Expression | Value) => {
+  if (value === null) {
+    return null
+  }
+
+  switch (typeof value) {
+    case 'string':
+    case 'number':
+    case 'boolean':
+    case 'undefined':
+      return value
+  }
+
+  return (
+    value instanceof ArrayObject ||
+    value instanceof DictionaryObject ||
+    value instanceof FunctionObject
+  )
 }

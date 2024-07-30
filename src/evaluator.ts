@@ -24,7 +24,7 @@ import {
 } from './syntax/statements'
 import { TokenType } from './syntax/token'
 import { Expression, LValue, ReturnValue, Statement, Value } from './types'
-import { isTruthy } from './utils'
+import { isObject, isTruthy } from './utils'
 import { FunctionCallExpression } from './syntax/expressions'
 
 export class Evaluator {
@@ -146,6 +146,10 @@ const evaluateExpression = (
     case 'boolean':
     case 'undefined':
       return expression
+  }
+
+  if (isObject(expression)) {
+    return expression
   }
 
   if (expression instanceof ArrayLiteralExpression) {
@@ -393,13 +397,14 @@ const evaluateBinaryExpression = (
     case TokenType.EQ:
       if (typeof left === typeof right) {
         return left === right
+      } else {
+        return false
       }
-      throw new TypeMismatchError(TokenType.EQ, typeof left, typeof right)
     case TokenType.NOT_EQ:
       if (typeof left === typeof right) {
         return left !== right
       }
-      throw new TypeMismatchError(TokenType.NOT_EQ, typeof left, typeof right)
+      return true
   }
   throw new Error('Unknown binary expression')
 }

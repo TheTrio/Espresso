@@ -21,7 +21,7 @@ export class DictionaryObject extends IterableObject implements Object {
     if (typeof key !== 'string') {
       throw new Error('Key must be a string')
     }
-    return this.elements.get(key)
+    return this.elements.get(key) ?? null
   }
 
   set(key: any, value: any) {
