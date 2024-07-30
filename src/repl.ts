@@ -4,6 +4,7 @@ import repl from 'repl'
 import { Store } from './store'
 import { SyntaxError } from './errors'
 import { createBuiltins } from './builtins'
+import { asString } from './utils'
 
 const store = new Store(createBuiltins())
 const r = repl.start({
@@ -15,11 +16,7 @@ const r = repl.start({
       const evaluator = new Evaluator(tree, store)
       try {
         const result = evaluator.evaluate()
-        if (result?.asString) {
-          console.log(result.asString())
-        } else {
-          console.log(result)
-        }
+        console.log(asString(result))
       } catch (e: any) {
         console.log('Runtime error: ', e.message)
       }

@@ -1,19 +1,25 @@
 import { Store } from '../store'
-import { Expression, IterableObject, Object, Statement, Value } from '../types'
+import {
+  Expression,
+  IterableObject,
+  BaseObject,
+  Statement,
+  Value,
+} from '../types'
 import { asString } from '../utils'
 import { Token } from './token'
 
-export class DictionaryObject extends IterableObject implements Object {
-  private elements: Map<string, Object | Value> = new Map()
+export class DictionaryObject extends IterableObject implements BaseObject {
+  private elements: Map<string, BaseObject | Value> = new Map()
 
-  constructor(elements: Map<string, Object | Value>) {
+  constructor(elements: Map<string, BaseObject | Value>) {
     super()
     this.elements = elements
   }
 
   asString(): string {
     return `{${Array.from(this.elements)
-      .map(([key, value]) => `${key}: ${value}`)
+      .map(([key, value]) => `${asString(key)}: ${value}`)
       .join(', ')}}`
   }
 
@@ -36,11 +42,11 @@ export class DictionaryObject extends IterableObject implements Object {
   }
 }
 
-export class ArrayObject extends IterableObject implements Object {
-  private elements: (Object | Value)[] = []
+export class ArrayObject extends IterableObject implements BaseObject {
+  private elements: (BaseObject | Value)[] = []
   private length: number = 0
 
-  constructor(elements: (Object | Value)[]) {
+  constructor(elements: (BaseObject | Value)[]) {
     super()
     this.elements = elements
     this.length = elements.length
@@ -105,7 +111,7 @@ export class ArrayObject extends IterableObject implements Object {
   }
 }
 
-export class FunctionObject implements Object {
+export class FunctionObject implements BaseObject {
   parameters: Token[]
   body: Statement[]
   store: Store

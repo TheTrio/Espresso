@@ -106,7 +106,6 @@ export class Lexer {
         if (isLetter(this.currentChar())) {
           const identifier = this.getIdentifier()
           const keyword = Keyword[identifier as keyof typeof Keyword]
-
           if (keyword) {
             return {
               type: TokenType[keyword as keyof typeof TokenType],

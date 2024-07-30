@@ -38,8 +38,11 @@ export const isLVal = (node: any) => {
 }
 
 export const asString = (value: any) => {
-  if (value.asString) {
+  if (value?.asString) {
     return value.asString()
+  }
+  if (typeof value === 'string') {
+    return `"${value}"`
   }
   return value
 }

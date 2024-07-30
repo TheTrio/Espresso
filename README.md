@@ -137,6 +137,14 @@ However, the keys in a dictionary can only be strings.
 let a = {1: "hello"}; // This will throw an error
 ```
 
+To create an empty dictionary, you can use the `dict` function. `{}` will be treated as an empty block(which evaluates to `undefined`).
+
+```js
+let a = dict();
+let b = {};
+b // undefined
+```
+
 ### Functions
 
 Functions can be declared with the `fn` keyword. Like everything else in Espresso, functions are expressions.

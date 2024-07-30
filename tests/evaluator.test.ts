@@ -694,13 +694,13 @@ describe('Dictionaries', () => {
     )
     expect(getOutput('{"a": 1, "b": 2}["a"]')).toBe(1)
     expect(getOutput('{"a": 1, "b": 2}["b"]')).toBe(2)
-    expect(getOutput('{"a": 1, "b": 2}["c"]')).toBe(undefined)
+    expect(getOutput('{"a": 1, "b": 2}["c"]')).toBe(null)
   })
 
   test('with variables', () => {
     expect(getOutput('let x = {"a": 1, "b": 2}; x["a"]')).toBe(1)
     expect(getOutput('let x = {"a": 1, "b": 2}; x["b"]')).toBe(2)
-    expect(getOutput('let x = {"a": 1, "b": 2}; x["c"]')).toBe(undefined)
+    expect(getOutput('let x = {"a": 1, "b": 2}; x["c"]')).toBe(null)
 
     expect(getOutput('let x = {"a": 1, "b": 2}; x["a"] + x["b"]')).toBe(3)
 

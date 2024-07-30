@@ -25,6 +25,6 @@ export class ReturnValue {
   }
 }
 
-export interface Object {
+export interface BaseObject {
   asString: () => string
 }
