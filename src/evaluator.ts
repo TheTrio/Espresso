@@ -119,6 +119,8 @@ const setValueFromLValue = (lvalue: LValue, store: Store, value: any) => {
       left.set(evaluateExpression(lvalue.index, store), value)
     } else if (left instanceof DictionaryObject) {
       left.set(evaluateExpression(lvalue.index, store), value)
+    } else if (typeof left === 'string') {
+      throw new Error('Trying to modify an immutable string')
     } else {
       throw new Error('Trying to index a indexable object')
     }
@@ -167,7 +169,7 @@ const evaluateExpression = (
   }
 
   if (expression instanceof IndexExpression) {
-    const left: ArrayObject | DictionaryObject = evaluateExpression(
+    const left: ArrayObject | DictionaryObject | string = evaluateExpression(
       expression.left,
       store
     )
@@ -175,6 +177,17 @@ const evaluateExpression = (
       return left.at(evaluateExpression(expression.index, store))
     } else if (left instanceof DictionaryObject) {
       return left.at(evaluateExpression(expression.index, store))
+    } else if (typeof left === 'string') {
+      let index = evaluateExpression(expression.index, store)
+      if (typeof index !== 'number') {
+        throw new Error('Index must be a number')
+      }
+      if (index < 0) index = left.length + index
+      if (index < 0 || index >= left.length) {
+        throw new Error('Index out of bounds')
+      }
+
+      return left[index]
     } else {
       throw new Error('Trying to index a non-indexable object')
     }
