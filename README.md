@@ -245,6 +245,28 @@ let ans = while (i <=10) {
 ans // done
 ```
 
+### Scoping
+
+Espresso has block scoping. This means that variables declared inside a block are only available inside that block.
+
+```js
+{
+  let a = 20;
+  print(a); // 20
+}
+print(a); // undefined
+```
+
+Same is true for functions, loops and conditionals.
+
+```js
+let age = 22;
+if(age > 18){
+  let adult = true;
+}
+print(adult); // undefined
+```
+
 ### Returning values
 
 You can use the `return` keyword anywhere in the program. This will stop the execution of the current block and return the value.
