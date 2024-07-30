@@ -71,7 +71,13 @@ let b = 20;
 a + b; // 30
 ```
 
-There are currently 4 types of values: `number`, `boolean`, `string`, `array`, and `null`. This is excluding functions. Arrays and functions are references, while other values are primitives.
+There are currently 4 types of values: `number`, `boolean`, `string`, `array`, `null`, and `function`.
+
+_**Note**_: Arrays and Functions are stored as references, while the rest are primitive values.
+
+```js
+print(10==10) // true
+print([1]==[1]) // false
 
 You can mutate already declared variables.
 
