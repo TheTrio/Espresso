@@ -29,6 +29,7 @@ The language is based off of the Monkey language from the book [Writing an Inter
 10. [Object Oriented Programming](#object-oriented-programming)
 11. [Comments](#comments)
 12. [Built-in functions](#built-in-functions)
+13. [Examples](#examples)
 
 ### Variables
 
@@ -467,6 +468,69 @@ It's also important to note that these aren't reserved keywords. You can overrid
 }
 print(len("hello")); // 5
 ```
+
+### Examples
+
+That's a lot of information to take in. Here are a few examples to help you get started.
+
+Let's implement the solution to the classic Two Sum problem.
+
+```js
+let twoSum = fn(nums, target) {
+  let map = dict(); 
+  let len = len(nums);
+  let i = 0;
+  
+  while (i < len) {
+    let num = nums[i];
+    let diff = target - num;
+    if (map[str(diff)] != null) {
+      return [map[str(diff)], i]; 
+    }
+    map[str(num)] = i; 
+    i = i + 1;
+  }
+  return null;
+};
+
+let nums = [2, 7, 11, 15];
+let target = 9;
+twoSum(nums, target); // Output: [0, 1]
+```
+
+We can also implement a simple recursive function to calculate the factorial of a number.
+
+```js
+let factorial = fn(n) {
+  if (n == 0) {
+    return 1;
+  }
+  return n * factorial(n - 1);
+};
+
+factorial(5); // Output: 120
+```
+
+How about a reducer function?
+
+```js
+let reduce = fn(arr, f, init) {
+  let result = init;
+  let len = len(arr);
+  let i = 0;
+  
+  while (i < len) {
+    result = f(result, arr[i]);
+    i = i + 1;
+  }
+  return result;
+};
+
+let sum = reduce([1, 2, 3, 4], fn(acc, val) { acc + val; }, 0);
+sum; // Output: 10
+```
+
+As you can see, despite the language being quite simple, you can still do quite a lot with it.
 
 ## Installation
 
