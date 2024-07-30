@@ -23,7 +23,11 @@ import {
   Value,
   WhileExpression,
 } from './types'
-import { isTruthy, throwIfInvalidArrayIndexAccess } from './utils'
+import {
+  isTruthy,
+  throwIfInvalidArrayIndexAccess,
+  toPositiveIndex,
+} from './utils'
 
 export class Evaluator {
   statements: Statement[]
@@ -33,8 +37,7 @@ export class Evaluator {
     this.store = store
   }
   evaluate() {
-    const result = evaluateStatements(this.statements, this.store)
-    return result
+    return evaluateStatements(this.statements, this.store)
   }
 }
 
@@ -97,24 +100,24 @@ const getValueFromLValue = (lvalue: LValue, store: Store) => {
 }
 
 const getValueFromIndexExpression = (lvalue: IndexExpression, store: Store) => {
-  const array = evaluateExpression(lvalue.left, store)
-  const index = evaluateExpression(lvalue.index, store)
-  if (!(array instanceof ArrayObject)) {
-    throw new Error('Trying to index a non-array object')
-  }
-  if (typeof index !== 'number') {
-    throw new Error('Index must be a number')
-  }
-  if (index < 0 || index >= array.elements.length) {
-    throw new Error('Index out of bounds')
-  }
+  const array: ArrayObject = evaluateExpression(lvalue.left, store)
+  const index = toPositiveIndex(
+    evaluateExpression(lvalue.index, store),
+    array._length()
+  )
+
+  throwIfInvalidArrayIndexAccess(array, index)
   return array.elements.at(index)
 }
 
 const setValueFromLValue = (lvalue: LValue, store: Store, value: any) => {
   if (lvalue instanceof IndexExpression) {
-    const array = evaluateExpression(lvalue.left, store)
-    const index = evaluateExpression(lvalue.index, store)
+    const array: ArrayObject = evaluateExpression(lvalue.left, store)
+    let index = toPositiveIndex(
+      evaluateExpression(lvalue.index, store),
+      array._length()
+    )
+
     throwIfInvalidArrayIndexAccess(array, index)
     array.elements[index] = value
   } else {
@@ -134,6 +137,7 @@ const evaluateExpression = (
   if (expression === null) {
     return null
   }
+
   switch (typeof expression) {
     case 'string':
     case 'number':
@@ -149,8 +153,12 @@ const evaluateExpression = (
   }
 
   if (expression instanceof IndexExpression) {
-    const array = evaluateExpression(expression.left, store)
-    const index = evaluateExpression(expression.index, store)
+    const array: ArrayObject = evaluateExpression(expression.left, store)
+    const index = toPositiveIndex(
+      evaluateExpression(expression.index, store),
+      array._length()
+    )
+
     throwIfInvalidArrayIndexAccess(array, index)
     if (array instanceof ArrayObject && typeof index === 'number') {
       return array.elements.at(index)
@@ -160,9 +168,11 @@ const evaluateExpression = (
   if (expression instanceof BinaryExpression) {
     return evaluateBinaryExpression(expression, store)
   }
+
   if (expression instanceof UnaryExpression) {
     return evaluateUnaryExpression(expression, store)
   }
+
   if (expression instanceof IfElseExpression) {
     const blockStore = new Store(store)
     const result = evaluateIfElseExpression(expression, blockStore)
@@ -171,6 +181,7 @@ const evaluateExpression = (
     }
     return result
   }
+
   if (expression instanceof BlockExpression) {
     const blockStore = new Store(store)
     return extractReturnValue(
@@ -262,10 +273,12 @@ const evaluateFunction = (
   if (func instanceof NativeFunction) {
     return func.fn(...evaluatedArgs)
   }
+
   const newStore = new Store(func.store)
   func.parameters.forEach((param, i) => {
     newStore.set(param.value!, evaluatedArgs[i])
   })
+
   return extractReturnValue(
     evaluateBlockStatements(func.body, newStore)!,
     newStore
@@ -296,6 +309,7 @@ const evaluateBinaryExpression = (
 ): number | boolean | string | undefined => {
   const left = evaluateExpression(expression.left, store)
   const right = evaluateExpression(expression.right, store)
+
   switch (expression.node.type) {
     case TokenType.PLUS:
       if (typeof left === 'number' && typeof right === 'number') {
@@ -367,6 +381,7 @@ const evaluateBinaryExpression = (
       }
       throw new TypeMismatchError(TokenType.NOT_EQ, typeof left, typeof right)
   }
+  throw new Error('Unknown binary expression')
 }
 
 const evaluateUnaryExpression = (
@@ -386,6 +401,7 @@ const evaluateUnaryExpression = (
       }
       break
   }
+  throw new Error('Unknown unary expression')
 }
 
 const evaluateIfElseExpression = (

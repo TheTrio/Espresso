@@ -23,10 +23,6 @@ import { getPrecedence, isBinaryOperator, isLVal } from './utils'
 export const PRECEDENCES = {
   [TokenType.PLUS]: 1,
   [TokenType.MINUS]: 1,
-  [TokenType.ASTERISK]: 2,
-  [TokenType.SLASH]: 2,
-  [TokenType.LEFT_PAREN]: 3,
-  [TokenType.LBRACKET]: 3,
   [TokenType.ASSIGN]: 1,
   [TokenType.LESS_THAN]: 1,
   [TokenType.GREATER_THAN]: 1,
@@ -34,6 +30,10 @@ export const PRECEDENCES = {
   [TokenType.GREATER_THAN_EQ]: 1,
   [TokenType.EQ]: 1,
   [TokenType.NOT_EQ]: 1,
+  [TokenType.ASTERISK]: 2,
+  [TokenType.SLASH]: 2,
+  [TokenType.LEFT_PAREN]: 3,
+  [TokenType.LBRACKET]: 3,
 }
 
 export class Parser {
@@ -155,7 +155,7 @@ export class Parser {
     }
   }
 
-  parseLetStatement() {
+  private parseLetStatement() {
     this.match(TokenType.LET)
     const letStatement = new LetStatement()
     letStatement.lvalue = this.match(TokenType.IDENT)!
@@ -167,28 +167,21 @@ export class Parser {
     return letStatement
   }
 
-  parseReassignStatement() {
-    const lvalue = this.match(TokenType.IDENT)!
-    this.match(TokenType.ASSIGN)
-    const rvalue = this.parseExpression()
-    this.match(TokenType.SEMICOLON)
-    return new ReassignmentStatement(lvalue, rvalue!)
-  }
-
-  parseReturnStatement() {
+  private parseReturnStatement() {
     this.match(TokenType.RETURN)
     const returnStatement = new ReturnStatement(this.parseExpression()!)
     this.match(TokenType.SEMICOLON)
     return returnStatement
   }
 
-  parseExpression(parentPrecedence: number = 0): Expression | null {
+  private parseExpression(parentPrecedence: number = 0): Expression | null {
     let leftExpression: Expression | null = null
 
     const prefixFunction =
       this.PREFIX_FUNCTIONS[
         this.currentToken()!.type as keyof typeof this.PREFIX_FUNCTIONS
       ]
+
     if (prefixFunction) {
       leftExpression = prefixFunction()
     } else {
@@ -247,13 +240,13 @@ export class Parser {
     return leftExpression!
   }
 
-  parseIntegerLiteral(): Expression {
+  private parseIntegerLiteral(): Expression {
     return {
       node: this.match(TokenType.INT)!,
     }
   }
 
-  parsePrefixExpression(): Expression {
+  private parsePrefixExpression(): Expression {
     const token = this.currentToken()
     this.position++
     return new UnaryExpression(
@@ -261,26 +254,27 @@ export class Parser {
       this.parseExpression(PRECEDENCES[token?.type as keyof typeof PRECEDENCES])
     )
   }
-  parseIdentifier(): Expression {
+
+  private parseIdentifier(): Expression {
     return {
       node: this.match(TokenType.IDENT)!,
     }
   }
 
-  parseBoolean(): Expression {
+  private parseBoolean(): Expression {
     return {
       node: this.match(this.currentToken()!.type)!,
     }
   }
 
-  parseGroupedExpression(): Expression {
+  private parseGroupedExpression(): Expression {
     this.match(TokenType.LEFT_PAREN)
     const expression = this.parseExpression()
     this.match(TokenType.RIGHT_PAREN)
     return expression!
   }
 
-  parseIfExpression(): Expression {
+  private parseIfExpression(): Expression {
     const token = this.match(TokenType.IF)
     this.match(TokenType.LEFT_PAREN)
     const condition = this.parseExpression()
@@ -299,7 +293,7 @@ export class Parser {
     return new IfElseExpression(token!, condition, consequence, [])
   }
 
-  parseBlockStatement() {
+  private parseBlockStatement() {
     const statements: Statement[] = []
     while (
       this.currentToken() &&
@@ -316,7 +310,7 @@ export class Parser {
     return statements
   }
 
-  parseBlockExpression(): Expression | null {
+  private parseBlockExpression(): Expression | null {
     this.match(TokenType.LBRACE)
     const statements: Statement[] = []
     while (
@@ -333,7 +327,7 @@ export class Parser {
     return new BlockExpression(statements)
   }
 
-  parseFunctions(): Expression {
+  private parseFunctions(): Expression {
     const funcToken = this.match(TokenType.FUNCTION)
     this.match(TokenType.LEFT_PAREN)
     const parameters = this.parseFunctionParameters()
@@ -345,7 +339,7 @@ export class Parser {
     return new FunctionExpression(parameters, body, funcToken!)
   }
 
-  parseCallArguments() {
+  private parseCallArguments() {
     const args: Expression[] = []
     while (
       this.currentToken()?.type !== TokenType.RIGHT_PAREN &&
@@ -365,7 +359,7 @@ export class Parser {
     return args
   }
 
-  parseFunctionParameters() {
+  private parseFunctionParameters() {
     const parameters: Token[] = []
     while (
       this.currentToken()?.type !== TokenType.RIGHT_PAREN &&
@@ -385,7 +379,7 @@ export class Parser {
     return parameters
   }
 
-  match(tokenType: TokenType) {
+  private match(tokenType: TokenType) {
     if (this.currentToken()?.type === tokenType) {
       const token = this.currentToken()
       this.position++
@@ -394,12 +388,5 @@ export class Parser {
     this.errors.push(
       `expected ${tokenType} but got ${this.currentToken()?.type}`
     )
-  }
-
-  get peekToken() {
-    if (this.position + 1 >= this.tokens.length) {
-      return null
-    }
-    return this.tokens[this.position + 1]
   }
 }

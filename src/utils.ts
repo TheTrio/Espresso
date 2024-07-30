@@ -48,3 +48,10 @@ export const throwIfInvalidArrayIndexAccess = (array: any, index: any) => {
   }
   return true
 }
+
+export const toPositiveIndex = (index: number, length: number) => {
+  if (index < 0) {
+    return length + index
+  }
+  return index
+}

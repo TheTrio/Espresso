@@ -5,6 +5,7 @@ import { isDigit, isLetter, isWhitespace } from './utils'
 export class Lexer {
   position: number
   input: string
+
   constructor(input: string) {
     this.input = input
     this.position = 0
@@ -27,14 +28,12 @@ export class Lexer {
   nextToken(): Token {
     let token = TokenType.ILLEGAL
 
-    // first check for two character tokens
     const twoCharToken = this.twoCharToken()
 
     if (twoCharToken) {
       return twoCharToken
     }
 
-    // then check for single character tokens
     switch (this.currentChar()) {
       case '\0':
         token = TokenType.EOF
@@ -130,7 +129,8 @@ export class Lexer {
       type: token,
     }
   }
-  getString() {
+
+  private getString() {
     let str = ''
     while (this.currentChar() !== '"' && this.currentChar() !== '\0') {
       str += this.currentChar()
@@ -143,7 +143,7 @@ export class Lexer {
     return str
   }
 
-  getIdentifier() {
+  private getIdentifier() {
     let identifier = ''
     while (
       isLetter(this.currentChar()) ||
@@ -155,7 +155,7 @@ export class Lexer {
     return identifier
   }
 
-  getNumber() {
+  private getNumber() {
     let number = ''
     while (isDigit(this.currentChar())) {
       number += this.currentChar()
@@ -164,7 +164,7 @@ export class Lexer {
     return number
   }
 
-  peakChar() {
+  private peakChar() {
     const nextPos = this.position + 1
     if (nextPos >= this.input.length) {
       return '\0'
@@ -172,7 +172,7 @@ export class Lexer {
     return this.input[nextPos]
   }
 
-  twoCharToken() {
+  private twoCharToken() {
     if (this.currentChar() === '=') {
       if (this.peakChar() === '=') {
         this.position += 2
