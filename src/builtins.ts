@@ -1,10 +1,6 @@
 import { Store } from './store'
-import {
-  ArrayObject,
-  FunctionObject,
-  IterableObject,
-  NativeFunction,
-} from './types'
+import { ArrayObject, FunctionObject, NativeFunction } from './syntax/objects'
+import { IterableObject } from './types'
 
 export const createBuiltins = () => {
   const builtins = new Store()
@@ -39,7 +35,7 @@ export const createBuiltins = () => {
       if (!(arr instanceof ArrayObject)) {
         throw new Error('Expected array, got ' + typeof arr)
       }
-      arr.elements.push(value)
+      arr.push(value)
     })
   )
 
@@ -49,19 +45,7 @@ export const createBuiltins = () => {
       if (!(arr instanceof ArrayObject)) {
         throw new Error('Expected array, got ' + typeof arr)
       }
-      if (index === undefined) {
-        if (arr.elements.length === 0) {
-          throw new Error('Cannot pop from empty array')
-        }
-        return arr.elements.pop()
-      }
-      if (typeof index !== 'number') {
-        throw new Error('Expected number, got ' + typeof index)
-      }
-      if (index < 0 || index >= arr.elements.length) {
-        throw new Error('Index out of bounds')
-      }
-      return arr.elements.splice(index, 1)[0]
+      return arr.pop(index)
     })
   )
 

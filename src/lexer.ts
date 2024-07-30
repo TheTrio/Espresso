@@ -1,5 +1,6 @@
 import { IllegalTokenError, SyntaxError } from './errors'
-import { TokenType, Token, Keyword } from './types'
+import { Keyword } from './syntax/keywords'
+import { Token, TokenType } from './syntax/token'
 import { isDigit, isLetter, isWhitespace } from './utils'
 
 export class Lexer {
@@ -85,6 +86,9 @@ export class Lexer {
         break
       case ']':
         token = TokenType.RBRACKET
+        break
+      case ':':
+        token = TokenType.COLON
         break
       case '"':
         this.readChar()

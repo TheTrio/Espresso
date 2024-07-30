@@ -7,8 +7,11 @@ import {
   TypeMismatchError,
   VariableNotFoundError,
 } from '../src/errors'
-import { jest } from '@jest/globals'
-import { ArrayObject, FunctionObject } from '../src/types'
+import {
+  ArrayObject,
+  DictionaryObject,
+  FunctionObject,
+} from '../src/syntax/objects'
 const getOutput = (input: string) => {
   const parser = new Parser(input)
   const tree = parser.parse()
@@ -672,6 +675,63 @@ describe('Arrays', () => {
     )
     expect(getOutput('[1, "hello", true][0]')).toBe(1)
     expect(getOutput('[fn(x){x*x}, "hello", true][0](10)')).toBe(100)
+  })
+})
+
+describe('Dictionaries', () => {
+  test('simple tests', () => {
+    expect(getOutput('{"a": 1}')).toStrictEqual(
+      new DictionaryObject(new Map([['a', 1]]))
+    )
+    expect(getOutput('{"a": 1, "b": 2}')).toStrictEqual(
+      new DictionaryObject(
+        new Map([
+          ['a', 1],
+          ['b', 2],
+        ])
+      )
+    )
+    expect(getOutput('{"a": 1, "b": 2}["a"]')).toBe(1)
+    expect(getOutput('{"a": 1, "b": 2}["b"]')).toBe(2)
+    expect(getOutput('{"a": 1, "b": 2}["c"]')).toBe(undefined)
+  })
+
+  test('with variables', () => {
+    expect(getOutput('let x = {"a": 1, "b": 2}; x["a"]')).toBe(1)
+    expect(getOutput('let x = {"a": 1, "b": 2}; x["b"]')).toBe(2)
+    expect(getOutput('let x = {"a": 1, "b": 2}; x["c"]')).toBe(undefined)
+
+    expect(getOutput('let x = {"a": 1, "b": 2}; x["a"] + x["b"]')).toBe(3)
+
+    expect(
+      getOutput(`
+      let y = fn(x){x + x};
+      let x = {"a": 1, "func": y};
+      y = "hello";
+      x["func"](10)
+      `)
+    ).toBe(20)
+  })
+
+  test('expressions as keys', () => {
+    expect(
+      getOutput(
+        `
+        let value = fn(){"2"};
+        let map = {"2": 10};
+        map[value()]
+      `
+      )
+    ).toBe(10)
+  })
+
+  test('values as functions', () => {
+    expect(getOutput('{"a": fn(x){x*x}}["a"](10)')).toBe(100)
+  })
+
+  test('only allows strings as keys', () => {
+    expect(() => getOutput('{1: 1}')).toThrow(SyntaxError)
+    expect(() => getOutput('{true: 1}')).toThrow(SyntaxError)
   })
 })
 

@@ -2,32 +2,30 @@ import { TypeMismatchError, VariableNotFoundError } from './errors'
 import { NOT_FOUND_IN_STORE, Store } from './store'
 import {
   ArrayLiteralExpression,
-  ArrayObject,
   BinaryExpression,
   BlockExpression,
-  Expression,
-  FunctionCallExpression,
+  DictionaryLiteralExpression,
   FunctionExpression,
-  FunctionObject,
   IfElseExpression,
   IndexExpression,
-  LetStatement,
-  LValue,
+  UnaryExpression,
+  WhileExpression,
+} from './syntax/expressions'
+import {
+  ArrayObject,
+  DictionaryObject,
+  FunctionObject,
   NativeFunction,
+} from './syntax/objects'
+import {
+  LetStatement,
   ReassignmentStatement,
   ReturnStatement,
-  ReturnValue,
-  Statement,
-  TokenType,
-  UnaryExpression,
-  Value,
-  WhileExpression,
-} from './types'
-import {
-  isTruthy,
-  throwIfInvalidArrayIndexAccess,
-  toPositiveIndex,
-} from './utils'
+} from './syntax/statements'
+import { TokenType } from './syntax/token'
+import { Expression, LValue, ReturnValue, Statement, Value } from './types'
+import { isTruthy } from './utils'
+import { FunctionCallExpression } from './syntax/expressions'
 
 export class Evaluator {
   statements: Statement[]
@@ -100,26 +98,30 @@ const getValueFromLValue = (lvalue: LValue, store: Store) => {
 }
 
 const getValueFromIndexExpression = (lvalue: IndexExpression, store: Store) => {
-  const array: ArrayObject = evaluateExpression(lvalue.left, store)
-  const index = toPositiveIndex(
-    evaluateExpression(lvalue.index, store),
-    array._length()
+  const left: ArrayObject | DictionaryObject = evaluateExpression(
+    lvalue.left,
+    store
   )
-
-  throwIfInvalidArrayIndexAccess(array, index)
-  return array.elements.at(index)
+  if (left instanceof ArrayObject) {
+    return left.at(evaluateExpression(lvalue.index, store))
+  } else if (left instanceof DictionaryObject) {
+    return left.at(evaluateExpression(lvalue.index, store))
+  }
 }
 
 const setValueFromLValue = (lvalue: LValue, store: Store, value: any) => {
   if (lvalue instanceof IndexExpression) {
-    const array: ArrayObject = evaluateExpression(lvalue.left, store)
-    let index = toPositiveIndex(
-      evaluateExpression(lvalue.index, store),
-      array._length()
+    const left: ArrayObject | DictionaryObject = evaluateExpression(
+      lvalue.left,
+      store
     )
-
-    throwIfInvalidArrayIndexAccess(array, index)
-    array.elements[index] = value
+    if (left instanceof ArrayObject) {
+      left.set(evaluateExpression(lvalue.index, store), value)
+    } else if (left instanceof DictionaryObject) {
+      left.set(evaluateExpression(lvalue.index, store), value)
+    } else {
+      throw new Error('Trying to index a indexable object')
+    }
   } else {
     store.set(lvalue.value!, value)
   }
@@ -152,16 +154,25 @@ const evaluateExpression = (
     )
   }
 
-  if (expression instanceof IndexExpression) {
-    const array: ArrayObject = evaluateExpression(expression.left, store)
-    const index = toPositiveIndex(
-      evaluateExpression(expression.index, store),
-      array._length()
-    )
+  if (expression instanceof DictionaryLiteralExpression) {
+    const newMap = new Map()
+    expression.elements.forEach((value, key) => {
+      newMap.set(key, evaluateExpression(value, store))
+    })
+    return new DictionaryObject(newMap)
+  }
 
-    throwIfInvalidArrayIndexAccess(array, index)
-    if (array instanceof ArrayObject && typeof index === 'number') {
-      return array.elements.at(index)
+  if (expression instanceof IndexExpression) {
+    const left: ArrayObject | DictionaryObject = evaluateExpression(
+      expression.left,
+      store
+    )
+    if (left instanceof ArrayObject) {
+      return left.at(evaluateExpression(expression.index, store))
+    } else if (left instanceof DictionaryObject) {
+      return left.at(evaluateExpression(expression.index, store))
+    } else {
+      throw new Error('Trying to index a non-indexable object')
     }
   }
 

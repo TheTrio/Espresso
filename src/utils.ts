@@ -1,6 +1,6 @@
-import { ArrayIndexOutOfBoundsError } from './errors'
 import { PRECEDENCES } from './parser'
-import { ArrayObject, Token, TokenType } from './types'
+import { Token, TokenType } from './syntax/token'
+import { Value } from './types'
 
 export const isLetter = (letter: string) => {
   return letter.match(/[a-zA-Z]/) || letter == '_'
@@ -36,22 +36,9 @@ export const isLVal = (node: any) => {
   return node?.type === TokenType.IDENT || node?.type === TokenType.INDEX
 }
 
-export const throwIfInvalidArrayIndexAccess = (array: any, index: any) => {
-  if (!(array instanceof ArrayObject)) {
-    throw new Error('Trying to index a non-array object')
+export const asString = (value: any) => {
+  if (value.asString) {
+    return value.asString()
   }
-  if (typeof index !== 'number') {
-    throw new Error('Index must be a number')
-  }
-  if (index < 0 || index >= array.elements.length) {
-    throw new ArrayIndexOutOfBoundsError(index, array.elements.length)
-  }
-  return true
-}
-
-export const toPositiveIndex = (index: number, length: number) => {
-  if (index < 0) {
-    return length + index
-  }
-  return index
+  return value
 }

@@ -63,14 +63,15 @@ hello world
 
 1. [Variables](#variables)
 2. [Arrays](#arrays)
-3. [Functions](#functions)
-4. [Blocks](#blocks)
-5. [Conditionals](#conditionals)
-6. [Loops](#loops)
-7. [Scoping](#scoping)
-8. [Returning values](#returning-values)
-9. [Comments](#comments)
-10. [Built-in functions](#built-in-functions)
+3. [Dictionaries](#dictionaries)
+4. [Functions](#functions)
+5. [Blocks](#blocks)
+6. [Conditionals](#conditionals)
+7. [Loops](#loops)
+8. [Scoping](#scoping)
+9. [Returning values](#returning-values)
+10. [Comments](#comments)
+11. [Built-in functions](#built-in-functions)
 
 ### Variables
 
@@ -153,6 +154,30 @@ let a = [1, 2, 3];
 let b = a;
 b[0] = 10;
 a; // [10, 2, 3]
+```
+
+### Dictionaries
+
+Similar to other programming languages, Espresso supports key value pairs via dictionaries.
+
+```js
+let a = {"name": "Shashwat", "age": 22};
+a["name"]; // Shashwat
+a["age"] = 18;
+a["age"]; // 18
+```
+
+Similar to arrays, the values in a dictionary can be of any type.
+
+```js
+let a = {"name": "Shashwat", "age": 22, "func": fn(x){ return x*x; }};
+a["func"](10); // 100
+```
+
+However, the keys in a dictionary can only be strings.
+
+```js
+let a = {1: "hello"}; // This will throw an error
 ```
 
 ### Functions

@@ -4,20 +4,21 @@ import {
   ArrayLiteralExpression,
   BinaryExpression,
   BlockExpression,
-  Expression,
-  FunctionCallExpression,
+  DictionaryLiteralExpression,
   FunctionExpression,
   IfElseExpression,
   IndexExpression,
+  UnaryExpression,
+  WhileExpression,
+} from './syntax/expressions'
+import {
   LetStatement,
   ReassignmentStatement,
   ReturnStatement,
-  Statement,
-  Token,
-  TokenType,
-  UnaryExpression,
-  WhileExpression,
-} from './types'
+} from './syntax/statements'
+import { FunctionCallExpression } from './syntax/expressions'
+import { Token, TokenType } from './syntax/token'
+import { Expression, Statement } from './types'
 import { getPrecedence, isBinaryOperator, isLVal } from './utils'
 
 export const PRECEDENCES = {
@@ -55,7 +56,7 @@ export class Parser {
     [TokenType.LEFT_PAREN]: this.parseGroupedExpression.bind(this),
     [TokenType.IF]: this.parseIfExpression.bind(this),
     [TokenType.FUNCTION]: this.parseFunctions.bind(this),
-    [TokenType.LBRACE]: this.parseBlockExpression.bind(this),
+    [TokenType.LBRACE]: this.parseBlockOrDictionary.bind(this),
     [TokenType.QUOTE]: this.parseStringLiteral.bind(this),
     [TokenType.WHILE]: this.parseWhileExpression.bind(this),
     [TokenType.LBRACKET]: this.parseArrayLiteral.bind(this),
@@ -310,6 +311,36 @@ export class Parser {
     return statements
   }
 
+  private parseDictionary() {
+    const token = this.match(TokenType.LBRACE)
+    const elements: { key: string; value: Expression }[] = []
+    while (
+      this.currentToken()?.type !== TokenType.RBRACE &&
+      this.currentToken()?.type !== TokenType.EOF &&
+      this.currentToken()
+    ) {
+      const key = this.parseStringLiteral()
+      this.match(TokenType.COLON)
+      const value = this.parseExpression()
+      elements.push({
+        key: key.node.value!,
+        value: value!,
+      })
+      if (this.currentToken()?.type === TokenType.COMMA) {
+        this.position++
+      }
+    }
+    this.match(TokenType.RBRACE)
+    return new DictionaryLiteralExpression(elements, token!)
+  }
+
+  private parseBlockOrDictionary() {
+    if (this.peekToken(2)?.type === TokenType.COLON) {
+      return this.parseDictionary()
+    }
+    return this.parseBlockExpression()
+  }
+
   private parseBlockExpression(): Expression | null {
     this.match(TokenType.LBRACE)
     const statements: Statement[] = []
@@ -388,5 +419,13 @@ export class Parser {
     this.errors.push(
       `expected ${tokenType} but got ${this.currentToken()?.type}`
     )
+    throw new SyntaxError(this.errors)
+  }
+
+  private peekToken(factor = 1) {
+    if (this.position + factor >= this.tokens.length) {
+      return null
+    }
+    return this.tokens[this.position + factor]
   }
 }
