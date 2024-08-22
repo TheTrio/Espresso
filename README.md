@@ -49,7 +49,7 @@ _**Note**_: Arrays, Dictionaries and Functions  are stored as references, while 
 ```js
 print(10==10) // true
 print([1]==[1]) // false
-
+```
 You can mutate already declared variables.
 
 ```js
