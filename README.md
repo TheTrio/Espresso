@@ -285,7 +285,7 @@ let type = if (age > 18) {
 } else {
   "minor"
 };
-type // 10
+type // adult
 ```
 
 ### Loops
