@@ -131,6 +131,10 @@ const setValueFromLValue = (lvalue: LValue, store: Store, value: any) => {
 
 const evaluateLetStatement = (statement: LetStatement, store: Store) => {
   const value = evaluateExpression(statement.rvalue!, store)
+  if (value instanceof ReturnValue) {
+    setValueFromLValue(statement.lvalue!, store, value.value)
+    return
+  }
   setValueFromLValue(statement.lvalue!, store, value)
 }
 

@@ -17,6 +17,7 @@ The language is based off of the Monkey language from the book [Writing an Inter
 
 ## Usage
 
+0. [Installation](#installation)
 1. [Variables](#variables)
 2. [Arrays](#arrays)
 3. [Dictionaries](#dictionaries)
@@ -31,6 +32,31 @@ The language is based off of the Monkey language from the book [Writing an Inter
 12. [Comments](#comments)
 13. [Built-in functions](#built-in-functions)
 14. [Examples](#examples)
+
+## Installation
+
+You can install the interpreter from NPM
+
+```bash
+> npm install -g espressolang
+```
+
+Now you can execute espresso files by running
+
+```bash
+> espressolang file.es
+```
+
+Or you can get to the REPL by running `espresslang` without any arguments.
+
+```bash
+> espressolang
+
+> let word = "hello";
+undefined
+> word + " world"
+hello world
+```
 
 ### Variables
 
@@ -50,6 +76,7 @@ _**Note**_: Arrays, Dictionaries and Functions  are stored as references, while 
 print(10==10) // true
 print([1]==[1]) // false
 ```
+
 You can mutate already declared variables.
 
 ```js
@@ -558,47 +585,3 @@ sum; // Output: 10
 ```
 
 As you can see, despite the language being quite simple, you can still do quite a lot with it.
-
-## Installation
-
-You can run the repl by cloning the repository and running
-
-```bash
-git clone https://github.com/TheTrio/Espresso
-cd Espresso
-pnpm install
-pnpm repl
-```
-
-In the REPL, you can type `.editor` to enter multiline mode. Then you can type your code and press `Ctrl + D` to run it.
-
-Or you can run single line code by typing it directly.
-
-```bash
-$ pnpm repl
-
-> @ repl /Users/shashwat/Code/Espresso
-> tsc && node dist/src/repl.js
-> .editor
-// Entering editor mode (Ctrl+D to finish, Ctrl+C to cancel)
-if(true){
-  "true"
-}else{
-  "false"
-}
-// press Ctrl + D
-true
-```
-
-```bash
-$ pnpm repl
-
-> @ repl /Users/shashwat/Code/Espresso
-> tsc && node dist/src/repl.js
-
-> let word = "hello";
-undefined
-> word + " world"
-hello world
-
-```
