@@ -748,6 +748,54 @@ describe('Nulls', () => {
   })
 })
 
+describe('return values are unwrapped', () => {
+  test('with functions', () => {
+    expect(getOutput('fn(x){return fn(y){return x+y;};}(10)(20);')).toBe(30)
+  })
+  test('with if else', () => {
+    expect(
+      getOutput(
+        `
+        let x = fn(){
+          if(true){
+            return 10;
+          }
+          return 20;
+        };
+        x()
+      `
+      )
+    ).toBe(10)
+  })
+  test('with block expressions', () => {
+    expect(
+      getOutput(
+        `
+        let x = {
+          return 10;
+        };
+        x
+      `
+      )
+    ).toBe(10)
+  })
+  test('with while', () => {
+    expect(
+      getOutput(
+        `
+        let x = 1;
+        while(x<10){
+          x = x + 1;
+          if(x==5){
+            return x;
+          }
+        }
+      `
+      )
+    ).toBe(5)
+  })
+})
+
 describe('Miscellaneous tests', () => {
   test('simple tests', () => {
     expect(getOutput('let x = 1; let y = 2; x + y')).toBe(3)
