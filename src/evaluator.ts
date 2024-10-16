@@ -74,11 +74,11 @@ const evaluateReassignmentStatement = (
       value = currentStore.getLocal(lvalue.value!)
     }
     if (value !== NOT_FOUND_IN_STORE) {
-      setValueFromLValue(
-        statement.lvalue!,
-        currentStore,
-        evaluateExpression(statement.rvalue!, store)
-      )
+      let value = evaluateExpression(statement.rvalue!, store)
+      if (value instanceof ReturnValue) {
+        value = value.value
+      }
+      setValueFromLValue(statement.lvalue!, currentStore, value)
       return
     }
     currentStore = currentStore.parentStore!
