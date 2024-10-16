@@ -41,10 +41,10 @@ You can install the interpreter from NPM
 > npm install -g espressolang
 ```
 
-Now you can execute espresso files by running
+You can execute espresso files by passing the file path as an argument. The examples folder contains a few example programs.
 
 ```bash
-> espressolang file.es
+> espressolang examples/OOP.es
 ```
 
 Or you can get to the REPL by running `espresslang` without any arguments.
