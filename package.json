@@ -1,4 +1,13 @@
 {
+  "name": "espressolang",
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/TheTrio/Espresso"
+  },
+  "bin": "./bin/index.js",
+  "files": [
+    "bin"
+  ],
   "devDependencies": {
     "@babel/preset-env": "^7.25.0",
     "@babel/preset-typescript": "^7.24.7",
@@ -10,7 +19,7 @@
   "scripts": {
     "test": "jest",
     "watch:ts": "tsc --watch",
-    "repl": "tsc && node dist/src/repl.js",
+    "repl": "tsc && node bin",
     "test:watch": "jest --watch"
   }
 }

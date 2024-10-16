@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { Evaluator } from './evaluator'
 import { Parser } from './parser'
 import repl from 'repl'
@@ -5,8 +6,26 @@ import { Store } from './store'
 import { SyntaxError } from './errors'
 import { createBuiltins } from './builtins'
 import { asString } from './utils'
+import { readFileSync } from 'fs'
 
 const store = new Store(createBuiltins())
+const args = process.argv.slice(2)
+
+if (args.length > 0) {
+  const fileName = args[0]
+  const filePath = process.cwd() + '/' + fileName
+  const data = readFileSync(filePath, 'utf8')
+  const parser = new Parser(data)
+  const tree = parser.parse()
+  const evaluator = new Evaluator(tree, store)
+  try {
+    evaluator.evaluate()
+  } catch (e: any) {
+    console.log('Runtime error: ', e.message)
+  }
+  process.exit(0)
+}
+
 const r = repl.start({
   prompt: '> ',
   eval: (code: string, context: any, filename: any, callback: any) => {
