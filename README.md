@@ -545,10 +545,10 @@ let twoSum = fn(nums, target) {
   while (i < len) {
     let num = nums[i];
     let diff = target - num;
-    if (map[str(diff)] != null) {
-      return [map[str(diff)], i]; 
+    if (map[diff] != null) {
+      return [map[diff], i]; 
     }
-    map[str(num)] = i; 
+    map[num] = i; 
     i = i + 1;
   }
   return null;
