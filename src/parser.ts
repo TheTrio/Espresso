@@ -170,6 +170,10 @@ export class Parser {
 
   private parseReturnStatement() {
     this.match(TokenType.RETURN)
+    if (this.currentToken()?.type === TokenType.SEMICOLON) {
+      this.position++
+      return new ReturnStatement(null)
+    }
     const returnStatement = new ReturnStatement(this.parseExpression()!)
     this.match(TokenType.SEMICOLON)
     return returnStatement
@@ -313,17 +317,17 @@ export class Parser {
 
   private parseDictionary() {
     const token = this.match(TokenType.LBRACE)
-    const elements: { key: string; value: Expression }[] = []
+    const elements: { key: Expression; value: Expression }[] = []
     while (
       this.currentToken()?.type !== TokenType.RBRACE &&
       this.currentToken()?.type !== TokenType.EOF &&
       this.currentToken()
     ) {
-      const key = this.parseStringLiteral()
+      const key = this.parseExpression()
       this.match(TokenType.COLON)
       const value = this.parseExpression()
       elements.push({
-        key: key.node.value!,
+        key: key!,
         value: value!,
       })
       if (this.currentToken()?.type === TokenType.COMMA) {

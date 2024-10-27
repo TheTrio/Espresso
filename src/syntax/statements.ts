@@ -33,7 +33,7 @@ export class ReturnStatement implements Statement {
   }
   returnValue: Expression | null = null
 
-  constructor(returnValue?: Expression) {
+  constructor(returnValue?: Expression | null) {
     this.returnValue = returnValue || null
   }
 }

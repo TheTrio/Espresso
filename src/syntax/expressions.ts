@@ -117,10 +117,10 @@ export class ArrayLiteralExpression implements Expression {
 }
 
 export class DictionaryLiteralExpression implements Expression {
-  elements: Map<string, Expression> = new Map()
+  elements: Map<Expression, Expression> = new Map()
   node: Token
 
-  constructor(elements: { key: string; value: Expression }[], node: Token) {
+  constructor(elements: { key: Expression; value: Expression }[], node: Token) {
     elements.forEach(({ key, value }) => {
       this.elements.set(key, value)
     })

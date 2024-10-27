@@ -167,7 +167,10 @@ const evaluateExpression = (
   if (expression instanceof DictionaryLiteralExpression) {
     const newMap = new Map()
     expression.elements.forEach((value, key) => {
-      newMap.set(key, evaluateExpression(value, store))
+      newMap.set(
+        evaluateExpression(key, store),
+        evaluateExpression(value, store)
+      )
     })
     return new DictionaryObject(newMap)
   }

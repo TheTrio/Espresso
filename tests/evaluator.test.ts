@@ -730,9 +730,48 @@ describe('Dictionaries', () => {
     expect(getOutput('{"a": fn(x){x*x}}["a"](10)')).toBe(100)
   })
 
-  test('only allows strings as keys', () => {
-    expect(() => getOutput('{1: 1}')).toThrow(SyntaxError)
-    expect(() => getOutput('{true: 1}')).toThrow(SyntaxError)
+  test('allows arbitrary objects as keys', () => {
+    expect(getOutput('{"a": 1, 1: 2}["a"]')).toBe(1)
+    expect(getOutput('{"a": 1, 1: 2}[1]')).toBe(2)
+  })
+
+  test('allows functions as keys', () => {
+    expect(getOutput('{"a": 1, fn(x){x}: 2}["a"]')).toBe(1)
+    expect(getOutput('let dummy = fn(){}; {"a": 1, dummy: 2}[dummy]')).toBe(2)
+  })
+
+  test('uses references for keys', () => {
+    expect(getOutput('{"a": 1, fn(){}: 2}[fn(){}]')).toBe(null)
+  })
+
+  test('uses references for complex objects', () => {
+    expect(
+      getOutput(
+        `
+        let x = {"a": 1, "b": 2};
+        let y = x;
+        y["a"] = 10;
+        x["a"]
+      `
+      )
+    ).toBe(10)
+    expect(
+      getOutput(
+        `
+        let x = {"a": 1, "b": 2};
+        let y = x;
+        x = {"a": 10, "b": 20};
+        y
+      `
+      )
+    ).toStrictEqual(
+      new DictionaryObject(
+        new Map([
+          ['a', 1],
+          ['b', 2],
+        ])
+      )
+    )
   })
 })
 

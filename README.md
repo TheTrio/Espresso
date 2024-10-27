@@ -184,10 +184,17 @@ let a = {"name": "Shashwat", "age": 22, "func": fn(x){ return x*x; }};
 a["func"](10); // 100
 ```
 
-However, the keys in a dictionary can only be strings.
+The keys in a dictionary can be of any type. This includes objects, arrays and functions and even other dictionaries. However, for non-value types like these, the key is a pointer to the object, not the object itself.
+
+This means that if you use an object as a key, you need to use the same object to access the value. Having two objects with the same properties will not work.
+
+This is done to ensure the constant time complexity of dictionary operations while allowing for flexibility in the keys.
 
 ```js
-let a = {1: "hello"}; // This will throw an error
+let dummy = {"name": "Shashwat"};
+let a = {dummy: "hello"};
+print(a[dummy]); // hello
+print(a[{"name": "Shashwat"}]) // null
 ```
 
 To create an empty dictionary, you can use the `dict` function. `{}` will be treated as an empty block(which evaluates to `undefined`).
