@@ -87,6 +87,17 @@ const evaluateReassignmentStatement = (
     }
     currentStore = currentStore.parentStore!
   }
+  if (statement.lvalue instanceof IndexExpression) {
+    throw new VariableNotFoundError(
+      statement.lvalue.left.node.value!,
+      statement.lvalue.left.node.line
+    )
+  } else {
+    throw new VariableNotFoundError(
+      statement.lvalue!.value!,
+      statement.lvalue!.line
+    )
+  }
 }
 
 const getValueFromLValue = (lvalue: LValue, store: Store) => {
