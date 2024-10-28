@@ -2,12 +2,11 @@ import { Expression, Statement } from '../types'
 import { Token, TokenType } from './token'
 
 export class BlockExpression implements Expression {
-  node = {
-    type: TokenType.LBRACE,
-  }
+  node: Token
   statements: Statement[] = []
 
-  constructor(statements: Statement[]) {
+  constructor(token: Token, statements: Statement[]) {
+    this.node = token
     this.statements = statements
   }
 }
@@ -25,13 +24,12 @@ export class BinaryExpression implements Expression {
 }
 
 export class IndexExpression implements Expression {
-  node: Token = {
-    type: TokenType.INDEX,
-  }
+  node: Token
   left: Expression
   index: Expression
 
-  constructor(left: Expression, index: Expression) {
+  constructor(token: Token, left: Expression, index: Expression) {
+    this.node = token
     this.left = left
     this.index = index
   }

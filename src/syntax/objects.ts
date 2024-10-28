@@ -1,3 +1,4 @@
+import { IterableIndexOutOfBoundsError } from '../errors'
 import { Store } from '../store'
 import {
   Expression,
@@ -58,8 +59,9 @@ export class ArrayObject extends IterableObject implements BaseObject {
     if (typeof index !== 'number') {
       throw new Error('Index must be a number')
     }
-    if (index < 0 || index >= this.elements.length) {
-      throw new Error('Index out of bounds')
+    const newIndex = index < 0 ? this.length + index : index
+    if (newIndex < 0 || newIndex >= this.elements.length) {
+      throw new IterableIndexOutOfBoundsError(index, this.length)
     }
     return this.elements.at(index)
   }
@@ -68,8 +70,9 @@ export class ArrayObject extends IterableObject implements BaseObject {
     if (typeof index !== 'number') {
       throw new Error('Index must be a number')
     }
-    if (index < 0 || index >= this.elements.length) {
-      throw new Error('Index out of bounds')
+    const newIndex = index < 0 ? this.length + index : index
+    if (newIndex < 0 || newIndex >= this.elements.length) {
+      throw new IterableIndexOutOfBoundsError(index, this.length)
     }
 
     this.elements[this.toPositiveIndex(index)] = value
@@ -91,8 +94,9 @@ export class ArrayObject extends IterableObject implements BaseObject {
     if (typeof index !== 'number') {
       throw new Error('Expected number, got ' + typeof index)
     }
-    if (index < 0 || index >= this.elements.length) {
-      throw new Error('Index out of bounds')
+    const newIndex = index < 0 ? this.length + index : index
+    if (newIndex < 0 || newIndex >= this.elements.length) {
+      throw new IterableIndexOutOfBoundsError(index, this.length)
     }
     return this.elements.splice(this.toPositiveIndex(index), 1)[0]
   }

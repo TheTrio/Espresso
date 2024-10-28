@@ -43,6 +43,7 @@ export class Parser {
   tokens: Token[] = []
   position: number = 0
   errors: string[] = []
+  code: string
 
   PREFIX_FUNCTIONS = {
     [TokenType.INT]: this.parseIntegerLiteral.bind(this),
@@ -63,6 +64,7 @@ export class Parser {
   }
 
   constructor(code: string) {
+    this.code = code
     this.lexer = new Lexer(code)
     while (true) {
       const token = this.lexer.nextToken()
@@ -157,8 +159,7 @@ export class Parser {
   }
 
   private parseLetStatement() {
-    this.match(TokenType.LET)
-    const letStatement = new LetStatement()
+    const letStatement = new LetStatement(this.match(TokenType.LET))
     letStatement.lvalue = this.match(TokenType.IDENT)!
 
     this.match(TokenType.ASSIGN)
@@ -169,12 +170,12 @@ export class Parser {
   }
 
   private parseReturnStatement() {
-    this.match(TokenType.RETURN)
+    const token = this.match(TokenType.RETURN)
     if (this.currentToken()?.type === TokenType.SEMICOLON) {
       this.position++
-      return new ReturnStatement(null)
+      return new ReturnStatement(token, null)
     }
-    const returnStatement = new ReturnStatement(this.parseExpression()!)
+    const returnStatement = new ReturnStatement(token, this.parseExpression()!)
     this.match(TokenType.SEMICOLON)
     return returnStatement
   }
@@ -190,7 +191,11 @@ export class Parser {
     if (prefixFunction) {
       leftExpression = prefixFunction()
     } else {
-      this.errors.push(`Unknown prefix operator ${this.currentToken()?.type}`)
+      this.errors.push(
+        `Unknown prefix operator ${this.currentToken()?.type} at line ${
+          this.currentToken()?.line
+        }`
+      )
       return null
     }
 
@@ -220,17 +225,29 @@ export class Parser {
       } else if (this.currentToken()?.type === TokenType.LBRACKET) {
         this.position++
         const index = this.parseExpression()
-        this.match(TokenType.RBRACKET)
-        leftExpression = new IndexExpression(leftExpression!, index!)
+
+        leftExpression = new IndexExpression(
+          {
+            type: TokenType.INDEX,
+            line: this.match(TokenType.RBRACKET).line,
+          },
+          leftExpression!,
+          index!
+        )
       } else if (this.currentToken()?.type === TokenType.ASSIGN) {
+        const token = this.currentToken()!
         this.position++
         const rightExpression = this.parseExpression()
         if (!isLVal(leftExpression?.node)) {
           throw new SyntaxError([
-            `Expected lvalue, got ${leftExpression?.node.type}`,
+            `Expected lvalue, got ${leftExpression?.node.type} at line ${leftExpression?.node.line}`,
           ])
         }
         leftExpression = new ReassignmentStatement(
+          {
+            type: TokenType.LET,
+            line: token.line,
+          },
           leftExpression instanceof IndexExpression
             ? leftExpression
             : leftExpression!.node,
@@ -238,7 +255,9 @@ export class Parser {
         )
       } else {
         throw new SyntaxError([
-          `Unknown token ${this.currentToken()?.type} in expression`,
+          `Unknown token ${this.currentToken()?.type} in expression at line ${
+            this.currentToken()?.line
+          }`,
         ])
       }
     }
@@ -346,7 +365,7 @@ export class Parser {
   }
 
   private parseBlockExpression(): Expression | null {
-    this.match(TokenType.LBRACE)
+    const token = this.match(TokenType.LBRACE)
     const statements: Statement[] = []
     while (
       this.currentToken() &&
@@ -359,7 +378,7 @@ export class Parser {
       }
     }
     this.match(TokenType.RBRACE)
-    return new BlockExpression(statements)
+    return new BlockExpression(token, statements)
   }
 
   private parseFunctions(): Expression {
@@ -416,14 +435,21 @@ export class Parser {
 
   private match(tokenType: TokenType) {
     if (this.currentToken()?.type === tokenType) {
-      const token = this.currentToken()
+      const token = this.currentToken()!
       this.position++
       return token
     }
+    const line = this.currentToken()?.line
     this.errors.push(
-      `expected ${tokenType} but got ${this.currentToken()?.type}`
+      `expected ${tokenType} but got ${
+        this.currentToken()?.type
+      } at line ${line}`
     )
-    throw new SyntaxError(this.errors)
+    return {
+      type: tokenType,
+      value: tokenType.toString(),
+      line: -1,
+    }
   }
 
   private peekToken(factor = 1) {

@@ -3,6 +3,7 @@ import { Evaluator } from '../src/evaluator'
 import { Store } from '../src/store'
 import { Parser } from '../src/parser'
 import {
+  IterableIndexOutOfBoundsError,
   SyntaxError,
   TypeMismatchError,
   VariableNotFoundError,
@@ -835,6 +836,37 @@ describe('return values are unwrapped', () => {
   })
 })
 
+describe('iterables', () => {
+  test('work with positive indices', () => {
+    expect(getOutput('[1, 2, 3][0]')).toBe(1)
+    expect(getOutput('[1, 2, 3][1]')).toBe(2)
+    expect(getOutput('[1, 2, 3][2]')).toBe(3)
+    expect(getOutput('"abc"[0]')).toBe('a')
+  })
+
+  test('work with negative indices', () => {
+    expect(getOutput('[1, 2, 3][-1]')).toBe(3)
+    expect(getOutput('[1, 2, 3][-2]')).toBe(2)
+    expect(getOutput('[1, 2, 3][-3]')).toBe(1)
+    expect(getOutput('"abc"[-1]')).toBe('c')
+  })
+
+  test('throws error for out of bounds indices', () => {
+    expect(() => getOutput('[1, 2, 3][3]')).toThrowError(
+      IterableIndexOutOfBoundsError
+    )
+    expect(() => getOutput('[1, 2, 3][-4]')).toThrowError(
+      IterableIndexOutOfBoundsError
+    )
+    expect(() => getOutput('"abc"[3]')).toThrowError(
+      IterableIndexOutOfBoundsError
+    )
+    expect(() => getOutput('"abc"[-4]')).toThrowError(
+      IterableIndexOutOfBoundsError
+    )
+  })
+})
+
 describe('Miscellaneous tests', () => {
   test('simple tests', () => {
     expect(getOutput('let x = 1; let y = 2; x + y')).toBe(3)
@@ -923,5 +955,28 @@ describe('Error handling', () => {
       Error
     )
     expect(() => getOutput('fn(a){a}(10,10)')).toThrowError(Error)
+  })
+
+  test('Variable not found', () => {
+    expect(() => getOutput('x')).toThrowError(VariableNotFoundError)
+    expect(() => getOutput('let x = 1; x + y')).toThrowError(
+      VariableNotFoundError
+    )
+  })
+
+  test('reports accurate line numbers', () => {
+    try {
+      getOutput('let x = 3')
+    } catch (e: any) {
+      expect(
+        e.errors.join(' ').includes('expected ; but got EOF at line 1')
+      ).toBeTruthy()
+    }
+    try {
+      getOutput('let x = y;')
+    } catch (e: any) {
+      console.log(e)
+      expect(e.message).toBe('Variable not found: y at line 1')
+    }
   })
 })

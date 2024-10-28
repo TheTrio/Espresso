@@ -1,39 +1,36 @@
 import { Expression, LValue, Statement } from '../types'
-import { TokenType } from './token'
+import { Token, TokenType } from './token'
 
 export class LetStatement implements Statement {
-  node = {
-    type: TokenType.LET,
-  }
   lvalue: LValue | null = null
   rvalue: Expression | null = null
+  node: Token
 
-  constructor(lvalue?: LValue, rvalue?: Expression) {
+  constructor(token: Token, lvalue?: LValue, rvalue?: Expression) {
+    this.node = token
     this.lvalue = lvalue || null
     this.rvalue = rvalue || null
   }
 }
 
 export class ReassignmentStatement implements Statement {
-  node = {
-    type: TokenType.LET,
-  }
+  node: Token
   lvalue: LValue | null = null
   rvalue: Expression | null = null
 
-  constructor(lvalue?: LValue, rvalue?: Expression) {
+  constructor(token: Token, lvalue?: LValue, rvalue?: Expression) {
+    this.node = token
     this.lvalue = lvalue || null
     this.rvalue = rvalue || null
   }
 }
 
 export class ReturnStatement implements Statement {
-  node = {
-    type: TokenType.RETURN,
-  }
+  node: Token
   returnValue: Expression | null = null
 
-  constructor(returnValue?: Expression | null) {
+  constructor(token: Token, returnValue?: Expression | null) {
+    this.node = token
     this.returnValue = returnValue || null
   }
 }

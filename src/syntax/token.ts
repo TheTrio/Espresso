@@ -1,6 +1,7 @@
 export type Token = {
   type: TokenType
   value?: string
+  line: number
 }
 
 export enum TokenType {

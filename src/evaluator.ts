@@ -1,4 +1,8 @@
-import { TypeMismatchError, VariableNotFoundError } from './errors'
+import {
+  IterableIndexOutOfBoundsError,
+  TypeMismatchError,
+  VariableNotFoundError,
+} from './errors'
 import { NOT_FOUND_IN_STORE, Store } from './store'
 import {
   ArrayLiteralExpression,
@@ -92,7 +96,7 @@ const getValueFromLValue = (lvalue: LValue, store: Store) => {
 
   const result = store.get(lvalue.value!)
   if (result === NOT_FOUND_IN_STORE) {
-    throw new VariableNotFoundError(lvalue.value!)
+    throw new VariableNotFoundError(lvalue.value!, lvalue.line)
   }
   return result
 }
@@ -189,12 +193,12 @@ const evaluateExpression = (
       if (typeof index !== 'number') {
         throw new Error('Index must be a number')
       }
-      if (index < 0) index = left.length + index
-      if (index < 0 || index >= left.length) {
-        throw new Error('Index out of bounds')
+      const newIndex = index < 0 ? left.length + index : index
+      if (newIndex < 0 || newIndex >= left.length) {
+        throw new IterableIndexOutOfBoundsError(index, left.length)
       }
 
-      return left[index]
+      return left[newIndex]
     } else {
       throw new Error('Trying to index a non-indexable object')
     }
@@ -362,22 +366,42 @@ const evaluateBinaryExpression = (
         return left + right
       }
 
-      throw new TypeMismatchError(TokenType.PLUS, typeof left, typeof right)
+      throw new TypeMismatchError(
+        TokenType.PLUS,
+        typeof left,
+        typeof right,
+        expression.node.line
+      )
     case TokenType.MINUS:
       if (typeof left === 'number' && typeof right === 'number') {
         return left - right
       }
-      throw new TypeMismatchError(TokenType.MINUS, typeof left, typeof right)
+      throw new TypeMismatchError(
+        TokenType.MINUS,
+        typeof left,
+        typeof right,
+        expression.node.line
+      )
     case TokenType.ASTERISK:
       if (typeof left === 'number' && typeof right === 'number') {
         return left * right
       }
-      throw new TypeMismatchError(TokenType.ASTERISK, typeof left, typeof right)
+      throw new TypeMismatchError(
+        TokenType.ASTERISK,
+        typeof left,
+        typeof right,
+        expression.node.line
+      )
     case TokenType.SLASH:
       if (typeof left === 'number' && typeof right === 'number') {
         return left / right
       }
-      throw new TypeMismatchError(TokenType.SLASH, typeof left, typeof right)
+      throw new TypeMismatchError(
+        TokenType.SLASH,
+        typeof left,
+        typeof right,
+        expression.node.line
+      )
     case TokenType.LESS_THAN:
       if (typeof left === 'number' && typeof right === 'number') {
         return left < right
@@ -385,7 +409,8 @@ const evaluateBinaryExpression = (
       throw new TypeMismatchError(
         TokenType.LESS_THAN,
         typeof left,
-        typeof right
+        typeof right,
+        expression.node.line
       )
     case TokenType.GREATER_THAN:
       if (typeof left === 'number' && typeof right === 'number') {
@@ -394,7 +419,8 @@ const evaluateBinaryExpression = (
       throw new TypeMismatchError(
         TokenType.GREATER_THAN,
         typeof left,
-        typeof right
+        typeof right,
+        expression.node.line
       )
     case TokenType.LESS_THAN_EQ:
       if (typeof left === 'number' && typeof right === 'number') {
@@ -403,7 +429,8 @@ const evaluateBinaryExpression = (
       throw new TypeMismatchError(
         TokenType.LESS_THAN_EQ,
         typeof left,
-        typeof right
+        typeof right,
+        expression.node.line
       )
     case TokenType.GREATER_THAN_EQ:
       if (typeof left === 'number' && typeof right === 'number') {
@@ -412,7 +439,8 @@ const evaluateBinaryExpression = (
       throw new TypeMismatchError(
         TokenType.GREATER_THAN_EQ,
         typeof left,
-        typeof right
+        typeof right,
+        expression.node.line
       )
     case TokenType.EQ:
       if (typeof left === typeof right) {

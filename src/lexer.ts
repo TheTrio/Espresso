@@ -6,10 +6,12 @@ import { isDigit, isLetter, isWhitespace } from './utils'
 export class Lexer {
   position: number
   input: string
+  currentLine: number
 
   constructor(input: string) {
     this.input = input
     this.position = 0
+    this.currentLine = 1
   }
 
   currentChar() {
@@ -96,9 +98,13 @@ export class Lexer {
         return {
           type: TokenType.QUOTE,
           value,
+          line: this.currentLine,
         }
       default: {
         if (isWhitespace(this.currentChar())) {
+          if (this.currentChar() === '\n') {
+            this.currentLine++
+          }
           this.readChar()
           return this.nextToken()
         }
@@ -109,18 +115,21 @@ export class Lexer {
           if (keyword) {
             return {
               type: TokenType[keyword as keyof typeof TokenType],
+              line: this.currentLine,
             }
           }
 
           return {
             type: TokenType.IDENT,
             value: identifier,
+            line: this.currentLine,
           }
         } else if (isDigit(this.currentChar())) {
           const number = this.getNumber()
           return {
             type: TokenType.INT,
             value: number,
+            line: this.currentLine,
           }
         } else {
           throw new IllegalTokenError(this.currentChar())
@@ -130,6 +139,7 @@ export class Lexer {
     this.readChar()
     return {
       type: token,
+      line: this.currentLine,
     }
   }
 
@@ -140,7 +150,7 @@ export class Lexer {
       this.readChar()
     }
     if (this.currentChar() !== '"') {
-      throw new SyntaxError(['Unterminated string'])
+      throw new SyntaxError(['Unterminated string at line ' + this.currentLine])
     }
     this.readChar()
     return str
@@ -175,12 +185,13 @@ export class Lexer {
     return this.input[nextPos]
   }
 
-  private twoCharToken() {
+  private twoCharToken(): Token | undefined {
     if (this.currentChar() === '=') {
       if (this.peakChar() === '=') {
         this.position += 2
         return {
           type: TokenType.EQ,
+          line: this.currentLine,
         }
       }
     } else if (this.currentChar() === '!') {
@@ -188,6 +199,7 @@ export class Lexer {
         this.position += 2
         return {
           type: TokenType.NOT_EQ,
+          line: this.currentLine,
         }
       }
     } else if (this.currentChar() === '<') {
@@ -195,6 +207,7 @@ export class Lexer {
         this.position += 2
         return {
           type: TokenType.LESS_THAN_EQ,
+          line: this.currentLine,
         }
       }
     } else if (this.currentChar() === '>') {
@@ -202,6 +215,7 @@ export class Lexer {
         this.position += 2
         return {
           type: TokenType.GREATER_THAN_EQ,
+          line: this.currentLine,
         }
       }
     } else if (this.currentChar() === '/') {
