@@ -13,8 +13,7 @@ const args = process.argv.slice(2)
 
 if (args.length > 0) {
   const fileName = args[0]
-  const filePath = process.cwd() + '/' + fileName
-  const data = readFileSync(filePath, 'utf8')
+  const data = readFileSync(fileName, 'utf8')
   try {
     const parser = new Parser(data)
     const tree = parser.parse()
