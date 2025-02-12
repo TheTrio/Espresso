@@ -1,12 +1,15 @@
 {
   "name": "espressolang",
-  "version": "1.1.6",
+  "version": "1.2.2",
   "repository": {
     "url": "https://github.com/TheTrio/Espresso"
   },
   "bin": "./bin/index.js",
+  "main": "./bin/main.js",
+  "types": "./types/main.d.ts",
   "files": [
-    "bin"
+    "bin",
+    "types"
   ],
   "devDependencies": {
     "@babel/preset-env": "^7.25.0",
@@ -21,6 +24,8 @@
     "watch:ts": "tsc --watch",
     "build": "tsc",
     "dev": "tsc && node bin",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "types": "tsc --declaration --emitDeclarationOnly --outDir types",
+    "prepublish": "pnpm run build && pnpm run types"
   }
 }

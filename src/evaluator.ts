@@ -30,13 +30,21 @@ import { TokenType } from './syntax/token'
 import { Expression, LValue, ReturnValue, Statement, Value } from './types'
 import { isObject, isTruthy } from './utils'
 import { FunctionCallExpression } from './syntax/expressions'
+import { createBuiltins } from './builtins'
 
 export class Evaluator {
   statements: Statement[]
   store: Store
-  constructor(statements: Statement[], store: Store) {
+  constructor(
+    statements: Statement[],
+    options?: {
+      store?: Store
+      redirectTo?: string[]
+    }
+  ) {
     this.statements = statements
-    this.store = store
+    const { store, redirectTo } = options ?? {}
+    this.store = store ?? new Store(createBuiltins(redirectTo))
   }
   evaluate() {
     return evaluateStatements(this.statements, this.store)

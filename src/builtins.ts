@@ -8,11 +8,23 @@ import {
 import { IterableObject } from './types'
 import { isObject } from './utils'
 
-export const createBuiltins = () => {
+export const createBuiltins = (redirectTo?: string[]) => {
   const builtins = new Store()
   builtins.set(
     'print',
     new NativeFunction('print', (...args) => {
+      if (redirectTo) {
+        return redirectTo.push(
+          args
+            .map((arg) => {
+              if (isObject(arg)) {
+                return arg.asString()
+              }
+              return arg
+            })
+            .join(' ')
+        )
+      }
       console.log(
         ...args.map((arg) => {
           if (isObject(arg)) {

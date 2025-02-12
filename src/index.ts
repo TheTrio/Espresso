@@ -17,7 +17,9 @@ if (args.length > 0) {
   try {
     const parser = new Parser(data)
     const tree = parser.parse()
-    const evaluator = new Evaluator(tree, store)
+    const evaluator = new Evaluator(tree, {
+      store,
+    })
     evaluator.evaluate()
   } catch (e: any) {
     if (e instanceof SyntaxError) {
@@ -35,7 +37,9 @@ const r = repl.start({
     try {
       const parser = new Parser(code)
       const tree = parser.parse()
-      const evaluator = new Evaluator(tree, store)
+      const evaluator = new Evaluator(tree, {
+        store,
+      })
       try {
         const result = evaluator.evaluate()
         console.log(asString(result))
