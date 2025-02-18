@@ -35,6 +35,8 @@ The language is based off of the Monkey language from the book [Writing an Inter
 
 ## Installation
 
+You can play with around with the language on the online playground without installing anything [here](https://espresso.thetrio.dev/#Variables)
+
 You can install the interpreter from NPM
 
 ```bash
