@@ -35,9 +35,9 @@ The language is based off of the Monkey language from the book [Writing an Inter
 
 ## Installation
 
-You can play with around with the language on the online playground without installing anything [here](https://espresso.thetrio.dev/)
+You can play with around with the language on the online playground without installing anything [here](https://espresso.thetrio.dev/).
 
-You can install the interpreter from NPM
+You can also install the interpreter locally from NPM
 
 ```bash
 > npm install -g espressolang
