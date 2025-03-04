@@ -174,6 +174,14 @@ export class Lexer {
       number += this.currentChar()
       this.readChar()
     }
+    if (this.currentChar() === '.') {
+      number += this.currentChar()
+      this.readChar()
+      while (isDigit(this.currentChar())) {
+        number += this.currentChar()
+        this.readChar()
+      }
+    }
     return number
   }
 

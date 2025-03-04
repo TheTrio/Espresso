@@ -16,7 +16,9 @@ import {
 const getOutput = (input: string) => {
   const parser = new Parser(input)
   const tree = parser.parse()
-  const evaluator = new Evaluator(tree, new Store())
+  const evaluator = new Evaluator(tree, {
+    store: new Store(),
+  })
   return evaluator.evaluate()
 }
 
@@ -864,6 +866,29 @@ describe('iterables', () => {
     expect(() => getOutput('"abc"[-4]')).toThrowError(
       IterableIndexOutOfBoundsError
     )
+  })
+})
+
+describe('numbers', () => {
+  test('work with negative numbers', () => {
+    expect(getOutput('-1')).toBe(-1)
+    expect(getOutput('-1 + 2')).toBe(1)
+    expect(getOutput('1 - 2')).toBe(-1)
+    expect(getOutput('1 - -2')).toBe(3)
+  })
+  test('work with floating point numbers', () => {
+    expect(getOutput('1.5')).toBe(1.5)
+    expect(getOutput('1.5 + 2.5')).toBe(4)
+    expect(getOutput('1.5 - 2.5')).toBe(-1)
+    expect(getOutput('1.5 - -2.5')).toBe(4)
+    expect(getOutput('0.1 + 0.2')).toBeCloseTo(0.3)
+  })
+
+  test('trailing zeros are optional', () => {
+    expect(getOutput('1.')).toBe(1)
+    expect(getOutput('1.0')).toBe(1)
+    expect(getOutput('1.000')).toBe(1)
+    expect(getOutput('let x = 1. + 3.3; x')).toBe(4.3)
   })
 })
 

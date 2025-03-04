@@ -269,7 +269,7 @@ const evaluateExpression = (
   }
 
   if (expression.node.type === TokenType.INT) {
-    return parseInt(expression.node.value!)
+    return parseFloat(expression.node.value!)
   }
 
   if (expression.node.type === TokenType.QUOTE) {
